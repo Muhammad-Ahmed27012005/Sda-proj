@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Watch')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="player-shell">
+  <video id="stream-video" class="stream-player"></video>
+  <section class="player-controls">
+    <div id="progress" class="progress-wrap"><div id="progress-fill" class="progress-fill"></div></div>
+    <div class="control-row">
+      <button id="play-toggle" class="icon-btn" type="button" title="Play or pause">Play</button>
+      <button id="stop" class="icon-btn" type="button" title="Stop">Stop</button>
+      <button id="skip-back" class="icon-btn" type="button" title="Back 10 seconds">-10</button>
+      <button id="skip-forward" class="icon-btn" type="button" title="Forward 10 seconds">+10</button>
+      <button id="mute" class="icon-btn" type="button" title="Mute">Mute</button>
+      <input id="volume" class="form-range w-auto" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+      <select id="speed" class="form-select form-select-sm w-auto" aria-label="Playback speed">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+      <span id="quality-label" class="text-muted-light"></span>
+      <span id="timecode" class="ms-auto text-muted-light">0:00 / 0:00</span>
+      <button id="fullscreen" class="icon-btn" type="button" title="Fullscreen">Full</button>
+    </div>
+  </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/player.js}"></script>
+</body>
+</html>

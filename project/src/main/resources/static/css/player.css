@@ -1,0 +1,52 @@
+.player-shell {
+  background: #000;
+  min-height: 70vh;
+}
+
+.stream-player {
+  width: 100%;
+  max-height: 72vh;
+  background: #000;
+}
+
+.player-controls {
+  background: #111;
+  border-top: 1px solid #2b2b2b;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.progress-wrap {
+  height: 8px;
+  background: #444;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #e50914;
+  border-radius: inherit;
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  min-width: 56px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: #1f1f1f;
+  color: #fff;
+}
+
+.icon-btn:hover {
+  background: #2b2b2b;
+}

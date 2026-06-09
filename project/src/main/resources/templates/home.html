@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<header class="hero">
+  <div class="container pb-5">
+    <h1>StreamFlixTv</h1>
+    <p class="lead col-lg-6">Cinema, series, and documentaries in one immersive streaming library.</p>
+    <div class="d-flex gap-2">
+      <a class="btn btn-light btn-lg" th:href="@{/watch/1}">Play</a>
+      <a class="btn btn-outline-light btn-lg" th:href="@{/subscribe}">Subscribe</a>
+    </div>
+  </div>
+</header>
+<main class="container-fluid px-4 py-4">
+  <section class="mb-5">
+    <h2 class="h4 mb-3">Trending Now</h2>
+    <div id="trending-row" class="content-row"></div>
+  </section>
+  <section class="mb-5">
+    <h2 class="h4 mb-3">Recently Added</h2>
+    <div id="recent-row" class="content-row"></div>
+  </section>
+  <section class="mb-5">
+    <h2 class="h4 mb-3">Browse by Category</h2>
+    <div id="category-row" class="d-flex flex-wrap gap-2"></div>
+  </section>
+  <section>
+    <h2 class="h4 mb-3">Search Results</h2>
+    <div id="search-row" class="content-row"></div>
+  </section>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/home.js}"></script>
+</body>
+</html>

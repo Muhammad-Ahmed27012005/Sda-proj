@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Not Found')}"></head>
+<body>
+<main class="container min-vh-100 d-flex align-items-center justify-content-center text-center">
+  <section>
+    <h1 class="display-3">404</h1>
+    <p class="text-muted-light">The title or page could not be found.</p>
+    <a class="btn btn-stream" th:href="@{/}">Home</a>
+  </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

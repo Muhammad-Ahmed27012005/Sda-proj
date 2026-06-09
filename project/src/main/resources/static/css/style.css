@@ -1,0 +1,120 @@
+:root {
+  --sf-bg: #141414;
+  --sf-panel: #1f1f1f;
+  --sf-panel-2: #252525;
+  --sf-red: #e50914;
+  --sf-text: #ffffff;
+  --sf-muted: #b3b3b3;
+  --sf-border: #333333;
+}
+
+body {
+  background: var(--sf-bg);
+  color: var(--sf-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.navbar {
+  background: #090909;
+}
+
+.brand-mark {
+  color: var(--sf-red);
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.btn-stream {
+  background: var(--sf-red);
+  border-color: var(--sf-red);
+  color: #fff;
+}
+
+.btn-stream:hover {
+  background: #b80710;
+  border-color: #b80710;
+  color: #fff;
+}
+
+.hero {
+  min-height: 58vh;
+  display: flex;
+  align-items: end;
+  background:
+    linear-gradient(90deg, rgba(20, 20, 20, 0.95), rgba(20, 20, 20, 0.35)),
+    linear-gradient(0deg, #141414 0%, rgba(20, 20, 20, 0.1) 45%),
+    url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
+.hero h1 {
+  font-size: clamp(2.25rem, 5vw, 4.75rem);
+  font-weight: 800;
+}
+
+.content-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 260px);
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+}
+
+.video-card,
+.panel {
+  background: var(--sf-panel);
+  border: 1px solid var(--sf-border);
+  border-radius: 8px;
+}
+
+.video-card img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  background: #2d2d2d;
+}
+
+.video-card .card-body {
+  min-height: 126px;
+}
+
+.text-muted-light {
+  color: var(--sf-muted);
+}
+
+.form-control,
+.form-select {
+  background: #222;
+  border-color: #3a3a3a;
+  color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: #222;
+  border-color: var(--sf-red);
+  color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.2);
+}
+
+.plan-card {
+  min-height: 330px;
+}
+
+.stat-card {
+  background: var(--sf-panel-2);
+  border: 1px solid var(--sf-border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.table-dark {
+  --bs-table-bg: #1c1c1c;
+  --bs-table-striped-bg: #242424;
+}
