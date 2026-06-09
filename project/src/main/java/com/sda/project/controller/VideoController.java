@@ -90,18 +90,11 @@ public class VideoController {
 			@RequestParam(required = false, defaultValue = "Movie") String genre,
 			@RequestParam(required = false) Integer duration,
 			@RequestParam(required = false) Integer releaseYear,
-			@RequestParam(required = false) BigDecimal rating,
-			@RequestParam(required = false) String imdbId) {
-		String videoPath = fileStorageService.store(videoFile, "videos");
+			@RequestParam(required = false) BigDecimal rating) {
+		String videoPath = fileStorageService.store(videoFile, "movies");
 		String thumbnailPath = fileStorageService.store(thumbnailFile, "thumbnails");
-		VideoDTO dto = new VideoDTO(null, title, description, genre, duration, releaseYear, rating, thumbnailPath, videoPath, imdbId, null);
+		VideoDTO dto = new VideoDTO(null, title, description, genre, duration, releaseYear, rating, thumbnailPath, videoPath, null, null);
 		return ApiResponse.ok("Video uploaded", videoService.toDto(videoService.createVideo(dto)));
-	}
-
-	@PostMapping("/imdb/{imdbId}")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<VideoDTO> addFromImdb(@PathVariable String imdbId) {
-		return ApiResponse.ok("IMDb video imported", videoService.toDto(videoService.createFromImdb(imdbId)));
 	}
 
 	@PutMapping("/{id}")
@@ -132,9 +125,11 @@ public class VideoController {
 		if (!response.allowed()) {
 			throw new SubscriptionRequiredException(response.reason());
 		}
-		Long userId = userService.currentUser(authentication).getUserId();
-		// DESIGN PATTERN: Command
-		invoker.executeCommand(new PlayVideoCommand(videoService, userId, id));
+		if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
+			Long userId = userService.currentUser(authentication).getUserId();
+			// DESIGN PATTERN: Command
+			invoker.executeCommand(new PlayVideoCommand(videoService, userId, id));
+		}
 		Video video = videoService.findById(id);
 		if (video.getVideoUrl() == null || video.getVideoUrl().isBlank()) {
 			throw new ResourceNotFoundException("No local video file is attached to this title");

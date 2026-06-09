@@ -8,12 +8,13 @@ class StreamFlixPlayer {
 
   init() {
     this.video.src = `/api/videos/stream/${this.videoId}`;
-    this.loadLastPosition();
+    this.loadLastPosition().catch(() => {});
     this.bindControls();
     this.startPositionSaving();
   }
 
   async loadLastPosition() {
+    if (!getJwt()) return;
     const items = await apiFetch('/api/history/continue');
     const match = items.find(item => Number(item.videoId) === Number(this.videoId));
     if (match?.lastPosition) {
@@ -44,6 +45,7 @@ class StreamFlixPlayer {
   async savePosition() {
     if (!this.video.duration || Number.isNaN(this.video.duration)) return;
     const pct = (this.video.currentTime / this.video.duration) * 100;
+    if (!getJwt()) return;
     await apiFetch('/api/history/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -84,9 +86,10 @@ class StreamFlixPlayer {
 document.addEventListener('DOMContentLoaded', async () => {
   const element = document.getElementById('stream-video');
   if (!element) return;
-  requireAuth();
   const videoId = location.pathname.split('/').pop();
   const user = currentUser();
+  const video = await apiFetch(`/api/videos/${videoId}`);
+  document.getElementById('player-title').textContent = video.title;
   const info = await apiFetch(`/api/videos/stream-info/${videoId}`);
   document.getElementById('quality-label').textContent = `${info.qualityLabel} - ${info.bitrate}`;
   new StreamFlixPlayer(element, videoId, user?.userId).init();

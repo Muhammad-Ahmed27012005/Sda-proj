@@ -6,6 +6,8 @@ async function loadHome() {
   ]);
   renderVideos('trending-row', trending);
   renderVideos('recent-row', recent);
+  renderVideos('featured-slider', recent.length ? recent : trending);
+  renderVideos('continue-row', recent.slice(0, 6));
   renderCategories(categories);
 }
 
@@ -18,7 +20,7 @@ function renderCategories(root) {
   const target = document.getElementById('category-row');
   const children = root.children || [];
   target.innerHTML = children.map(category => `
-    <button class="btn btn-outline-light" data-category="${category.name}">${category.name}</button>
+    <button class="category-chip" data-category="${category.name}">${category.name}</button>
   `).join('');
   target.querySelectorAll('[data-category]').forEach(button => {
     button.addEventListener('click', () => searchVideos(button.dataset.category));

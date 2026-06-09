@@ -39,6 +39,8 @@ public class SecurityConfig {
 								"/api/videos/",
 								"/api/videos/trending",
 								"/api/videos/recent",
+								"/api/videos/stream/**",
+								"/api/videos/stream-info/**",
 								"/api/categories/**",
 								"/v3/api-docs/**",
 								"/swagger-ui/**",

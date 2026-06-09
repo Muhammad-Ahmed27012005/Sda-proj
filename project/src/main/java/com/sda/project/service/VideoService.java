@@ -1,6 +1,5 @@
 package com.sda.project.service;
 
-import com.sda.project.dto.ImdbVideoDTO;
 import com.sda.project.dto.VideoDTO;
 import com.sda.project.exception.ResourceNotFoundException;
 import com.sda.project.model.Video;
@@ -9,10 +8,17 @@ import com.sda.project.patterns.singleton.ConfigurationManager;
 import com.sda.project.patterns.singleton.DatabaseConnectionManager;
 import com.sda.project.repository.VideoRepository;
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +28,15 @@ public class VideoService {
 	private static final Logger log = LoggerFactory.getLogger(VideoService.class);
 	private final VideoRepository videoRepository;
 	private final WatchHistoryService watchHistoryService;
-	private final ImdbApiService imdbApiService;
+	private final Path moviesDirectory;
 
-	public VideoService(VideoRepository videoRepository, WatchHistoryService watchHistoryService, ImdbApiService imdbApiService) {
+	public VideoService(
+			VideoRepository videoRepository,
+			WatchHistoryService watchHistoryService,
+			@Value("${app.movies.dir:upload/movies}") String moviesDirectory) {
 		this.videoRepository = videoRepository;
 		this.watchHistoryService = watchHistoryService;
-		this.imdbApiService = imdbApiService;
+		this.moviesDirectory = Path.of(moviesDirectory).toAbsolutePath().normalize();
 	}
 
 	@PostConstruct
@@ -37,19 +46,31 @@ public class VideoService {
 	}
 
 	public List<Video> findAll(String genre, Integer year, BigDecimal rating, String search, int limit) {
-		return videoRepository.search(blankToNull(genre), year, rating, blankToNull(search), PageRequest.of(0, Math.max(1, limit)));
+		syncMoviesFolder();
+		return videoRepository.search(blankToNull(genre), year, rating, blankToNull(search), PageRequest.of(0, Math.max(1, limit)))
+				.stream()
+				.filter(this::isLocalMovie)
+				.collect(java.util.stream.Collectors.collectingAndThen(
+						java.util.stream.Collectors.toMap(Video::getVideoUrl, video -> video, (first, ignored) -> first, LinkedHashMap::new),
+						map -> List.copyOf(map.values())));
 	}
 
 	public Video findById(Long id) {
+		syncMoviesFolder();
 		return videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video not found"));
 	}
 
 	public List<Video> trending() {
-		return videoRepository.findTrending(PageRequest.of(0, 10));
+		syncMoviesFolder();
+		return uniqueByPath(videoRepository.findTrending(PageRequest.of(0, 50))).stream().limit(10).toList();
 	}
 
 	public List<Video> recent() {
-		return videoRepository.findTop10ByOrderByUploadDateDesc();
+		syncMoviesFolder();
+		return uniqueByPath(videoRepository.findAll()).stream()
+				.sorted((left, right) -> right.getUploadDate().compareTo(left.getUploadDate()))
+				.limit(10)
+				.toList();
 	}
 
 	@Transactional
@@ -67,17 +88,6 @@ public class VideoService {
 				.imdbId(dto.imdbId())
 				.buildVideo();
 		return videoRepository.save(video);
-	}
-
-	@Transactional
-	public Video createFromImdb(String imdbId) {
-		return videoRepository.findByImdbId(imdbId).orElseGet(() -> {
-			ImdbVideoDTO imdb = imdbApiService.fetchVideoById(imdbId);
-			String genre = imdb.genres() == null || imdb.genres().isEmpty() ? "Movie" : String.join(", ", imdb.genres());
-			VideoDTO dto = new VideoDTO(null, imdb.title(), imdb.plot(), genre, imdb.runtimeMinutes(), imdb.releaseYear(),
-					imdb.averageRating() == null ? null : BigDecimal.valueOf(imdb.averageRating()), imdb.primaryImage(), null, imdb.id(), null);
-			return createVideo(dto);
-		});
 	}
 
 	@Transactional
@@ -115,5 +125,65 @@ public class VideoService {
 
 	private String blankToNull(String value) {
 		return value == null || value.isBlank() ? null : value;
+	}
+
+	@Transactional
+	public void syncMoviesFolder() {
+		try {
+			Files.createDirectories(moviesDirectory);
+			try (var files = Files.list(moviesDirectory)) {
+				files.filter(Files::isRegularFile)
+						.filter(this::isVideoFile)
+						.forEach(this::upsertLocalMovie);
+			}
+		} catch (IOException ex) {
+			throw new IllegalStateException("Unable to scan movies folder: " + moviesDirectory, ex);
+		}
+	}
+
+	private void upsertLocalMovie(Path file) {
+		String relativePath = "movies/" + file.getFileName();
+		if (videoRepository.findAll().stream().anyMatch(video -> relativePath.equals(video.getVideoUrl()))) {
+			return;
+		}
+		String title = titleFromFilename(file.getFileName().toString());
+		VideoDTO dto = new VideoDTO(
+				null,
+				title,
+				"Local streaming asset discovered from the movies folder.",
+				"Movie",
+				null,
+				null,
+				null,
+				null,
+				relativePath,
+				null,
+				null);
+		createVideo(dto);
+	}
+
+	private boolean isVideoFile(Path file) {
+		String name = file.getFileName().toString().toLowerCase(Locale.ROOT);
+		return name.endsWith(".mp4") || name.endsWith(".webm") || name.endsWith(".mov") || name.endsWith(".m4v");
+	}
+
+	private boolean isLocalMovie(Video video) {
+		return video.getVideoUrl() != null && video.getVideoUrl().startsWith("movies/");
+	}
+
+	private List<Video> uniqueByPath(List<Video> videos) {
+		Map<String, Video> byPath = new LinkedHashMap<>();
+		for (Video video : videos) {
+			if (isLocalMovie(video)) {
+				byPath.putIfAbsent(video.getVideoUrl(), video);
+			}
+		}
+		return List.copyOf(byPath.values());
+	}
+
+	private String titleFromFilename(String filename) {
+		int dot = filename.lastIndexOf('.');
+		String base = dot > 0 ? filename.substring(0, dot) : filename;
+		return base.replace('_', ' ').replace('-', ' ').replaceAll("\\s+", " ").trim();
 	}
 }

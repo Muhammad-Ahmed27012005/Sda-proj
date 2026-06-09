@@ -5,7 +5,6 @@
 - Java 25
 - Maven or the included Maven wrapper
 - MySQL 8+
-- A RapidAPI IMDb key exported as `RAPIDAPI_KEY`
 
 ## MySQL
 
@@ -20,7 +19,6 @@ Set credentials before running:
 ```powershell
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="yourpassword"
-$env:RAPIDAPI_KEY="your-rapidapi-key"
 ```
 
 ## Run
@@ -39,12 +37,15 @@ The app seeds this account on startup:
 - Email: `admin@streamflix.com`
 - Password: `admin123`
 
-## Upload a Test Video
+## Add Movies
 
-1. Log in as the admin.
-2. Open `/admin/videos`.
-3. Upload an MP4 file and optional thumbnail.
-4. Subscribe a user account to a plan before streaming.
+Place MP4 files in:
+
+```text
+C:\Users\Daver\Documents\GitHub\Sda-proj\project\upload\movies
+```
+
+Refresh the home page. The app automatically creates a library entry for each file and uses the filename as the movie title.
 
 ## Test Streaming with Postman
 
@@ -55,7 +56,7 @@ The app seeds this account on startup:
 { "email": "admin@streamflix.com", "password": "admin123" }
 ```
 
-3. Copy the `token` value.
+3. Copy the `token` value if you want to test as an authenticated user. Public local playback also works without a token.
 4. Send `GET http://localhost:8080/api/videos/stream/{id}` with headers:
 
 ```text

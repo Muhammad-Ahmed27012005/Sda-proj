@@ -39,16 +39,19 @@ function logout() {
 }
 
 function videoCard(video) {
-  const image = video.thumbnailUrl ? `/uploads/${video.thumbnailUrl}` : 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80';
+  const image = video.thumbnailUrl ? `/uploads/${video.thumbnailUrl}` : '';
+  const title = video.title || 'Untitled';
   return `
-    <article class="card video-card text-white">
-      <img src="${image}" class="card-img-top" alt="${video.title}">
-      <div class="card-body">
-        <h3 class="h6 mb-1">${video.title}</h3>
-        <p class="small text-muted-light mb-2">${video.genre || 'Movie'} ${video.releaseYear ? ' - ' + video.releaseYear : ''}</p>
-        <div class="d-flex gap-2">
-          <a class="btn btn-sm btn-light" href="/videos/${video.videoId}">Info</a>
-          <a class="btn btn-sm btn-stream" href="/watch/${video.videoId}">Play</a>
+    <article class="video-card">
+      <a class="video-poster" href="/watch/${video.videoId}" aria-label="Play ${title}">
+        ${image ? `<img src="${image}" alt="${title}">` : `<span>${title}</span>`}
+      </a>
+      <div class="video-meta">
+        <p>${video.genre || 'Movie'}${video.releaseYear ? ' / ' + video.releaseYear : ''}</p>
+        <h3>${title}</h3>
+        <div class="video-actions">
+          <a class="btn btn-sm btn-stream" href="/watch/${video.videoId}">Start Watching</a>
+          <a class="btn btn-sm btn-outline-light" href="/videos/${video.videoId}">Details</a>
         </div>
       </div>
     </article>`;
@@ -60,4 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     el.textContent = user ? user.fullName : 'Guest';
   });
   document.querySelectorAll('[data-logout]').forEach(el => el.addEventListener('click', logout));
+  const nav = document.querySelector('.sf-nav');
+  const updateNav = () => nav?.classList.toggle('is-scrolled', window.scrollY > 24);
+  updateNav();
+  window.addEventListener('scroll', updateNav, { passive: true });
 });

@@ -31,6 +31,9 @@ public class StreamingService {
 	}
 
 	public StreamingResponseDTO validateAndStream(Long videoId, Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+			return new StreamingResponseDTO(true, "Public local library stream", "/api/videos/stream/" + videoId, "Local", 1080, "Adaptive");
+		}
 		Long userId = userService.currentUser(authentication).getUserId();
 		Subscription subscription = subscriptionService.activeSubscription(userId)
 				.orElseThrow(() -> new SubscriptionRequiredException("Subscribe to a plan before streaming"));

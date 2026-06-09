@@ -1,21 +1,22 @@
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top" xmlns:th="http://www.thymeleaf.org" th:fragment="navbar">
-  <div class="container-fluid px-4">
-    <a class="navbar-brand brand-mark" th:href="@{/}">StreamFlixTv</a>
+<nav class="sf-nav navbar navbar-expand-lg navbar-dark fixed-top" xmlns:th="http://www.thymeleaf.org" th:fragment="navbar">
+  <div class="container-fluid px-4 px-xl-5">
+    <a class="navbar-brand brand-mark" th:href="@{/}">StreamFlix</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/watchlist}">Watchlist</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/history}">History</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/subscribe}">Plans</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/}">Browse</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/#library}">Movies</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/#live}">Live</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/#categories}">Categories</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/subscribe}">Pricing</a></li>
         <li class="nav-item"><a class="nav-link" th:href="@{/admin}">Admin</a></li>
       </ul>
       <form id="search-form" class="d-flex me-3" role="search">
         <input class="form-control form-control-sm" name="search" type="search" placeholder="Search" aria-label="Search">
       </form>
-      <div class="dropdown">
+      <div class="dropdown profile-menu">
         <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" data-user-name>Guest</button>
         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
           <li><a class="dropdown-item" th:href="@{/profile}">Profile</a></li>
