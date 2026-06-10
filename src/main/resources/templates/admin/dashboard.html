@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard')}"></head>
+<body data-admin-page>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container py-5">
+  <h1 class="h2 mb-4">Admin Dashboard</h1>
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="stat-card"><p>Total Users</p><strong data-stat="totalUsers">0</strong></div></div>
+    <div class="col-md-3"><div class="stat-card"><p>Total Videos</p><strong data-stat="totalVideos">0</strong></div></div>
+    <div class="col-md-3"><div class="stat-card"><p>Active Subscriptions</p><strong data-stat="activeSubscriptions">0</strong></div></div>
+    <div class="col-md-3"><div class="stat-card"><p>Revenue</p><strong data-stat="revenue">0</strong></div></div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-stream" th:href="@{/admin/videos}">Videos</a>
+    <a class="btn btn-outline-light" th:href="@{/admin/users}">Users</a>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>
