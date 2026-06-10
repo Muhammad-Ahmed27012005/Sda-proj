@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Watchlist')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container py-5">
+  <h1 class="h2 mb-4">My Watchlist</h1>
+  <section id="watchlist-grid" class="row g-4"></section>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/watchlist.js}"></script>
+</body>
+</html>
