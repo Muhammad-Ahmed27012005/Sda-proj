@@ -13,45 +13,149 @@
 </head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
+
 <main class="player-shell">
   <div class="player-stage">
-    <section>
+
+    <!-- ── Video column ──────────────────────────────── -->
+    <div style="display:flex;flex-direction:column;background:#000;position:relative">
       <video id="stream-video" class="stream-player"></video>
-      <section class="player-controls">
-        <div id="progress" class="progress-wrap"><div id="progress-fill" class="progress-fill"></div></div>
-        <div class="control-row">
-          <button id="play-toggle" class="icon-btn" type="button" title="Play or pause">Play</button>
-          <button id="stop" class="icon-btn" type="button" title="Stop">Stop</button>
-          <button id="skip-back" class="icon-btn" type="button" title="Back 10 seconds">-10</button>
-          <button id="skip-forward" class="icon-btn" type="button" title="Forward 10 seconds">+10</button>
-          <button id="mute" class="icon-btn" type="button" title="Mute">Mute</button>
-          <input id="volume" class="form-range w-auto" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
-          <select id="speed" class="form-select form-select-sm w-auto" aria-label="Playback speed">
-            <option value="0.5">0.5x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-          </select>
-          <span id="quality-label" class="text-muted-light"></span>
-          <span id="timecode" class="ms-auto text-muted-light">0:00 / 0:00</span>
-          <button id="fullscreen" class="icon-btn" type="button" title="Fullscreen">Full</button>
+
+      <!-- Skip Intro (shown during first 90s) -->
+      <button id="skip-intro-btn" class="skip-intro-btn" hidden>
+        Skip Intro ⏭
+      </button>
+
+      <div class="player-controls">
+        <!-- Progress bar -->
+        <div id="progress" class="progress-wrap" role="slider" aria-label="Seek" tabindex="0">
+          <div id="progress-fill" class="progress-fill"></div>
         </div>
-      </section>
-    </section>
+
+        <!-- Controls row -->
+        <div class="control-row">
+          <button id="play-toggle"  class="icon-btn" type="button" title="Play / Pause">▶ Play</button>
+          <button id="stop"         class="icon-btn" type="button" title="Stop">■ Stop</button>
+          <button id="skip-back"    class="icon-btn" type="button" title="Back 10s">−10s</button>
+          <button id="skip-forward" class="icon-btn" type="button" title="Forward 10s">+10s</button>
+
+          <div class="ctrl-divider"></div>
+
+          <button id="mute" class="icon-btn" type="button" title="Mute">🔊</button>
+          <input id="volume" class="form-range" type="range" min="0" max="1" step="0.05" value="1"
+                 aria-label="Volume" style="width:88px;cursor:pointer">
+
+          <div class="ctrl-divider"></div>
+
+          <!-- Speed -->
+          <select id="speed" class="form-select form-select-sm quality-select" aria-label="Playback speed">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+          </select>
+
+          <!-- Quality -->
+          <select id="quality" class="form-select form-select-sm quality-select" aria-label="Quality">
+            <option value="4k">4K</option>
+            <option value="1080p">1080p</option>
+            <option value="720p" selected>720p HD</option>
+            <option value="480p">480p</option>
+          </select>
+
+          <span id="quality-label" class="sub-chip ms-1" style="display:none"></span>
+          <span id="timecode" class="ms-auto"
+                style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);white-space:nowrap">
+            0:00 / 0:00
+          </span>
+          <button id="fullscreen" class="icon-btn" type="button" title="Fullscreen">⛶ Full</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Sidebar ────────────────────────────────────── -->
     <aside class="player-sidebar">
-      <p class="section-kicker">Now Streaming</p>
-      <h1 id="player-title">Local Asset</h1>
-      <p class="text-muted-light mt-4">Premium player controls, range-request delivery, quality selector, playback speed, watch history integration for signed-in users, and related content posture.</p>
-      <div class="mt-5">
-        <p class="eyebrow">Subtitles</p>
-        <button class="btn btn-outline-light btn-sm" type="button">Off</button>
-        <button class="btn btn-outline-light btn-sm" type="button">English</button>
+      <p class="eyebrow mb-3">Now Streaming</p>
+      <h1 id="player-title">Loading…</h1>
+      <p id="player-meta" class="mt-2 mb-1"
+         style="font-family:var(--mono);font-size:.75rem;color:var(--text-muted)"></p>
+
+      <!-- Rating badge -->
+      <div id="player-rating" hidden class="mb-3"
+           style="font-family:var(--mono);font-size:.82rem;color:var(--acid-green)"></div>
+
+      <p id="player-desc"
+         style="color:var(--text-muted);font-size:.93rem;line-height:1.8;flex:1;margin-top:.75rem">—</p>
+
+      <!-- Subtitles -->
+      <div class="mt-4">
+        <p class="eyebrow mb-2">Subtitles</p>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="sub-chip btn p-0 px-3" type="button" id="sub-off"
+                  style="height:32px;font-family:var(--mono);font-size:.7rem;border-radius:999px;
+                         background:var(--acid-green);color:var(--off-black);border:none">Off</button>
+          <button class="sub-chip btn p-0 px-3" type="button" id="sub-en"
+                  style="height:32px;font-family:var(--mono);font-size:.7rem;border-radius:999px;
+                         background:transparent;color:var(--text-muted);border:1px solid var(--line-strong)">English</button>
+        </div>
+      </div>
+
+      <!-- Related / actions -->
+      <div class="mt-4 pt-4 d-flex flex-column gap-2" style="border-top:1px solid var(--line)">
+        <a id="details-link" href="#" class="btn btn-ghost btn-sm text-start px-3"
+           style="font-family:var(--mono);font-size:.75rem">📋 Full Details</a>
+        <button class="btn btn-ghost btn-sm text-start px-3" id="player-watchlist-btn"
+                style="font-family:var(--mono);font-size:.75rem">❤️ Add to Watchlist</button>
       </div>
     </aside>
   </div>
 </main>
+
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script th:src="@{/js/player.js}"></script>
+<script>
+// Wire quality selector (UI only — actual quality switching needs adaptive streaming)
+document.getElementById('quality')?.addEventListener('change', function() {
+  const label = document.getElementById('quality-label');
+  label.textContent = this.value;
+  label.style.display = '';
+});
+
+// Skip intro button (shows for first 90s, hides after click)
+const vid = document.getElementById('stream-video');
+const skipBtn = document.getElementById('skip-intro-btn');
+vid?.addEventListener('timeupdate', () => {
+  if (vid.currentTime < 90 && vid.currentTime > 2) {
+    skipBtn.hidden = false;
+  } else {
+    skipBtn.hidden = true;
+  }
+});
+skipBtn?.addEventListener('click', () => {
+  vid.currentTime = 90;
+  skipBtn.hidden = true;
+});
+
+// Subtitle toggle styling
+document.getElementById('sub-off')?.addEventListener('click', function() {
+  this.style.background = 'var(--acid-green)';
+  this.style.color = 'var(--off-black)';
+  this.style.border = 'none';
+  const en = document.getElementById('sub-en');
+  en.style.background = 'transparent';
+  en.style.color = 'var(--text-muted)';
+  en.style.border = '1px solid var(--line-strong)';
+});
+document.getElementById('sub-en')?.addEventListener('click', function() {
+  this.style.background = 'var(--acid-green)';
+  this.style.color = 'var(--off-black)';
+  this.style.border = 'none';
+  const off = document.getElementById('sub-off');
+  off.style.background = 'transparent';
+  off.style.color = 'var(--text-muted)';
+  off.style.border = '1px solid var(--line-strong)';
+});
+</script>
 </body>
 </html>

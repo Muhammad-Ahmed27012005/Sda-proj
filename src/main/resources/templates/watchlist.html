@@ -1,14 +1,86 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Watchlist')}"></head>
+<head th:replace="~{fragments/layout :: head('My Watchlist')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-<main class="container py-5">
-  <h1 class="h2 mb-4">My Watchlist</h1>
-  <section id="watchlist-grid" class="row g-4"></section>
+
+<div class="page-hero">
+  <div class="container-fluid px-4 px-xl-5">
+    <p class="eyebrow mb-3">Your Library</p>
+    <h1>My Watchlist</h1>
+    <p style="color:var(--text-muted);font-size:1.1rem;margin-top:.75rem;max-width:480px">
+      Titles you've saved to watch later — all in one place.
+    </p>
+  </div>
+</div>
+
+<main class="container-fluid px-4 px-xl-5 py-5">
+
+  <!-- empty state -->
+  <div id="watchlist-empty" hidden class="text-center py-5">
+    <div style="font-size:3.5rem;margin-bottom:1.5rem;opacity:.4">🎬</div>
+    <h2 style="font-family:var(--display);font-size:2rem;opacity:.6">Nothing saved yet</h2>
+    <p style="color:var(--text-muted);margin:.75rem 0 2rem">
+      Browse the library and add titles to your watchlist.
+    </p>
+    <a class="btn btn-stream px-5" th:href="@{/}">Browse Library</a>
+  </div>
+
+  <div id="watchlist-grid" class="row g-4"></div>
+
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script th:src="@{/js/watchlist.js}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  requireAuth();
+  try {
+    const items = await apiFetch('/api/watchlist');
+    const grid  = document.getElementById('watchlist-grid');
+    if (!items.length) {
+      document.getElementById('watchlist-empty').hidden = false;
+      return;
+    }
+    grid.innerHTML = items.map(item => {
+      const v     = item.video || item;
+      const title = v.title || 'Untitled';
+      const img   = v.thumbnailUrl ? `/uploads/${v.thumbnailUrl}` : '';
+      const genre = v.genre || 'Movie';
+      const year  = v.releaseYear ? ' · ' + v.releaseYear : '';
+      return `
+      <div class="col-sm-6 col-lg-4 col-xl-3">
+        <article class="watchlist-card h-100">
+          <a href="/watch/${v.videoId}" class="video-poster d-block" style="border-radius:var(--r-lg) var(--r-lg) 0 0;min-height:160px">
+            ${img ? `<img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">` : `<div class="video-poster-fallback"><span>${title}</span></div>`}
+            <div class="video-poster-play"><span>▶</span></div>
+          </a>
+          <div class="p-3">
+            <p class="video-meta-tag mb-1">${genre}${year}</p>
+            <h3 style="font-family:var(--display);font-size:1.2rem;margin-bottom:.85rem">${title}</h3>
+            <div class="d-flex gap-2">
+              <a class="btn btn-stream btn-sm flex-fill text-center" href="/watch/${v.videoId}">▶ Play</a>
+              <button class="btn btn-danger-soft btn-sm" onclick="removeFromWatchlist(${v.videoId}, this)">Remove</button>
+            </div>
+          </div>
+        </article>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    document.getElementById('watchlist-grid').innerHTML =
+      `<div class="col-12"><div class="alert-error">${err.message}</div></div>`;
+  }
+});
+
+async function removeFromWatchlist(videoId, btn) {
+  try {
+    await apiFetch(`/api/watchlist/${videoId}`, { method: 'DELETE' });
+    btn.closest('.col-sm-6').remove();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+</script>
 </body>
 </html>

@@ -1,24 +1,66 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('History')}"></head>
+<head th:replace="~{fragments/layout :: head('Watch History')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-<main class="container py-5">
-  <h1 class="h2 mb-4">Watch History</h1>
-  <section id="history-list" class="vstack gap-3"></section>
+
+<div class="page-hero">
+  <div class="container-fluid px-4 px-xl-5">
+    <p class="eyebrow mb-3">Your Activity</p>
+    <h1>Watch History</h1>
+    <p style="color:var(--text-muted);font-size:1.1rem;margin-top:.75rem;max-width:480px">
+      Every title you've started — with progress tracking.
+    </p>
+  </div>
+</div>
+
+<main class="container-fluid px-4 px-xl-5 py-5">
+
+  <div id="history-empty" hidden class="text-center py-5">
+    <div style="font-size:3.5rem;margin-bottom:1.5rem;opacity:.4">📺</div>
+    <h2 style="font-family:var(--display);font-size:2rem;opacity:.6">Nothing watched yet</h2>
+    <p style="color:var(--text-muted);margin:.75rem 0 2rem">Start a title and it'll appear here.</p>
+    <a class="btn btn-stream px-5" th:href="@{/}">Browse Library</a>
+  </div>
+
+  <div id="history-list" class="vstack gap-3" style="max-width:860px"></div>
+
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   requireAuth();
-  const rows = await apiFetch('/api/history');
-  document.getElementById('history-list').innerHTML = rows.map(row => `
-    <article class="panel p-3 d-flex justify-content-between align-items-center">
-      <span>${row.title}</span>
-      <span class="text-muted-light">${row.watchPercentage}%</span>
-    </article>
-  `).join('');
+  try {
+    const rows = await apiFetch('/api/history');
+    if (!rows.length) {
+      document.getElementById('history-empty').hidden = false;
+      return;
+    }
+    document.getElementById('history-list').innerHTML = rows.map(row => {
+      const pct   = Math.min(100, Math.round(row.watchPercentage || 0));
+      const title = row.title || row.videoTitle || 'Untitled';
+      const vid   = row.videoId;
+      return `
+      <article class="history-item">
+        <div style="flex:1;min-width:0">
+          <p class="eyebrow mb-1">${row.genre || 'Movie'}</p>
+          <h3 style="font-family:var(--display);font-size:1.2rem;margin:0 0 .6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${title}</h3>
+          <div class="d-flex align-items-center gap-3">
+            <div class="history-progress-bar">
+              <div class="history-progress-fill" style="width:${pct}%"></div>
+            </div>
+            <span style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);white-space:nowrap">${pct}% watched</span>
+          </div>
+        </div>
+        ${vid ? `<a class="btn btn-stream btn-sm flex-shrink-0" href="/watch/${vid}">▶ Resume</a>` : ''}
+      </article>`;
+    }).join('');
+  } catch (err) {
+    document.getElementById('history-list').innerHTML =
+      `<div class="alert-error">${err.message}</div>`;
+  }
 });
 </script>
 </body>

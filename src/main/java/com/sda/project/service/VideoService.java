@@ -147,6 +147,8 @@ public class VideoService {
 			return;
 		}
 		String title = titleFromFilename(file.getFileName().toString());
+		// Look for a matching thumbnail image (same stem) in upload/thumbnails
+		String thumbnailPath = findMatchingThumbnail(file);
 		VideoDTO dto = new VideoDTO(
 				null,
 				title,
@@ -155,11 +157,29 @@ public class VideoService {
 				null,
 				null,
 				null,
-				null,
+				thumbnailPath,
 				relativePath,
 				null,
 				null);
 		createVideo(dto);
+	}
+
+	/**
+	 * Looks for thumbnails/<stem>.jpg|png|webp alongside the video file.
+	 * Returns a relative path like "thumbnails/mymovie.jpg" or null if none found.
+	 */
+	private String findMatchingThumbnail(Path videoFile) {
+		String stem = videoFile.getFileName().toString();
+		int dot = stem.lastIndexOf('.');
+		if (dot > 0) stem = stem.substring(0, dot);
+		Path thumbDir = moviesDirectory.getParent().resolve("thumbnails");
+		for (String ext : new String[]{".jpg", ".jpeg", ".png", ".webp"}) {
+			Path candidate = thumbDir.resolve(stem + ext);
+			if (java.nio.file.Files.exists(candidate)) {
+				return "thumbnails/" + stem + ext;
+			}
+		}
+		return null;
 	}
 
 	private boolean isVideoFile(Path file) {

@@ -3,32 +3,104 @@
 <head th:replace="~{fragments/layout :: head('Video Details')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-<main class="container py-5">
-  <section id="video-detail" class="row g-4 align-items-center"></section>
+
+<main style="padding-top:5.5rem">
+
+  <!-- Loading state -->
+  <div id="detail-loading" class="container-fluid px-4 px-xl-5 py-5 text-center">
+    <p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted)">Loading…</p>
+  </div>
+
+  <!-- Detail layout (hidden until loaded) -->
+  <div id="detail-wrap" hidden>
+
+    <!-- Hero backdrop -->
+    <div id="detail-backdrop"
+         style="min-height:65vh;display:grid;align-items:end;position:relative;overflow:hidden;background:var(--racing-green)">
+      <div id="detail-backdrop-img"
+           style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:.35"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,14,15,.92) 0%,rgba(14,14,15,.4) 60%,transparent 100%)"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(180deg,transparent,var(--off-black))"></div>
+      <div class="container-fluid px-4 px-xl-5 pb-5" style="position:relative;z-index:1">
+        <p class="eyebrow mb-2" id="detail-genre-year"></p>
+        <h1 id="detail-title" style="font-family:var(--display);font-size:clamp(2.5rem,7vw,7rem);line-height:.88;font-weight:900;max-width:14ch;margin-bottom:1.5rem"></h1>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+          <a class="btn btn-stream btn-lg px-5" id="detail-play-btn" href="#">▶ Play Now</a>
+          <button class="btn btn-ghost btn-lg px-4" id="detail-watchlist-btn">+ Watchlist</button>
+          <span id="detail-rating-badge" style="display:none;font-family:var(--mono);font-size:.75rem;padding:.35rem .85rem;border:1px solid var(--line-strong);border-radius:999px;color:var(--text-muted)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info strip -->
+    <div class="container-fluid px-4 px-xl-5 py-5">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <p class="eyebrow mb-2">Synopsis</p>
+          <p id="detail-desc" style="font-size:1.1rem;color:var(--text-muted);line-height:1.8;max-width:680px">—</p>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel p-4">
+            <p class="eyebrow mb-3">Details</p>
+            <dl style="font-family:var(--mono);font-size:.82rem;margin:0">
+              <dt style="color:var(--text-dim);margin-bottom:.2rem">Genre</dt>
+              <dd id="detail-d-genre" style="color:var(--championship-white);margin-bottom:1rem">—</dd>
+              <dt style="color:var(--text-dim);margin-bottom:.2rem">Year</dt>
+              <dd id="detail-d-year" style="color:var(--championship-white);margin-bottom:1rem">—</dd>
+              <dt style="color:var(--text-dim);margin-bottom:.2rem">Rating</dt>
+              <dd id="detail-d-rating" style="color:var(--championship-white);margin-bottom:0">—</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script th:src="@{/js/watchlist.js}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const id = location.pathname.split('/').pop();
-  const video = await apiFetch(`/api/videos/${id}`);
-  const image = video.thumbnailUrl ? `/uploads/${video.thumbnailUrl}` : 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=1000&q=80';
-  document.getElementById('video-detail').innerHTML = `
-    <div class="col-lg-6"><img class="img-fluid rounded" src="${image}" alt="${video.title}"></div>
-    <div class="col-lg-6">
-      <h1>${video.title}</h1>
-      <p class="text-muted-light">${video.genre || 'Movie'} ${video.releaseYear ? ' - ' + video.releaseYear : ''} ${video.rating ? ' - Rating ' + video.rating : ''}</p>
-      <p>${video.description || ''}</p>
-      <div class="d-flex gap-2">
-        <a class="btn btn-light" href="/watch/${video.videoId}">Play</a>
-        <button class="btn btn-outline-light" id="watchlist-add">+ Watchlist</button>
-      </div>
-    </div>`;
-  document.getElementById('watchlist-add').addEventListener('click', async () => {
-    await addToWatchlist(video.videoId);
-    document.getElementById('watchlist-add').textContent = 'Added';
-  });
+  try {
+    const video = await apiFetch(`/api/videos/${id}`);
+    const img   = video.thumbnailUrl ? `/uploads/${video.thumbnailUrl}` : '';
+    const title = video.title || 'Untitled';
+
+    if (img) {
+      document.getElementById('detail-backdrop-img').style.backgroundImage = `url('${img}')`;
+      document.getElementById('detail-backdrop').style.background = '';
+    }
+    document.getElementById('detail-title').textContent = title;
+    document.getElementById('detail-genre-year').textContent =
+      [video.genre, video.releaseYear].filter(Boolean).join(' · ');
+    document.getElementById('detail-desc').textContent = video.description || 'No description available.';
+    document.getElementById('detail-play-btn').href = `/watch/${video.videoId}`;
+    document.getElementById('detail-d-genre').textContent  = video.genre     || '—';
+    document.getElementById('detail-d-year').textContent   = video.releaseYear || '—';
+    document.getElementById('detail-d-rating').textContent = video.rating    || '—';
+    if (video.rating) {
+      const rb = document.getElementById('detail-rating-badge');
+      rb.textContent = `⭐ ${video.rating}`;
+      rb.style.display = '';
+    }
+
+    document.getElementById('detail-loading').hidden = true;
+    document.getElementById('detail-wrap').hidden    = false;
+
+    document.getElementById('detail-watchlist-btn').addEventListener('click', async function() {
+      try {
+        await addToWatchlist(video.videoId);
+        this.textContent = '✓ Added';
+        this.disabled = true;
+      } catch (err) { alert(err.message); }
+    });
+  } catch (err) {
+    document.getElementById('detail-loading').innerHTML =
+      `<div class="alert-error mx-auto" style="max-width:480px">${err.message}</div>`;
+  }
 });
 </script>
 </body>

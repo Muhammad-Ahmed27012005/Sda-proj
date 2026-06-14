@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Subscription Confirmed')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main style="padding-top:6rem">
+  <section class="container-fluid px-4 px-xl-5 py-5">
+
+    <!-- Confirmation header -->
+    <div class="text-center mb-5 pb-3" style="max-width:600px;margin-inline:auto">
+      <div class="success-icon-wrap">✓</div>
+      <p class="eyebrow mb-2">Payment Successful</p>
+      <h1 id="success-heading" style="font-family:var(--display);font-size:clamp(2.5rem,6vw,5rem);line-height:.92;margin-bottom:1.25rem">
+        You're all set.
+      </h1>
+      <p id="success-subtext" style="color:var(--text-muted);font-size:1.1rem;line-height:1.7">
+        Your subscription is now active. Start streaming right away.
+      </p>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="data-grid mb-5" style="max-width:920px;margin-inline:auto">
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Plan</p>
+        <strong id="s-plan" style="font-size:1.8rem">—</strong>
+      </div>
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Amount</p>
+        <strong id="s-amount" style="font-size:1.8rem">—</strong>
+      </div>
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Method</p>
+        <strong id="s-method" style="font-size:1.5rem">—</strong>
+      </div>
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Status</p>
+        <strong id="s-status" style="color:var(--acid-green);font-size:1.5rem">ACTIVE</strong>
+      </div>
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Start Date</p>
+        <strong id="s-start" style="font-size:1.3rem">—</strong>
+      </div>
+      <div class="data-cell">
+        <p class="eyebrow mb-1">Renewal Date</p>
+        <strong id="s-end" style="font-size:1.3rem">—</strong>
+      </div>
+      <div class="data-cell" style="grid-column:span 2">
+        <p class="eyebrow mb-1">Transaction ID</p>
+        <strong id="s-txn" style="font-size:.95rem;word-break:break-all;font-family:var(--mono);font-weight:500">—</strong>
+      </div>
+    </div>
+
+    <!-- Plan features -->
+    <div class="split-section" style="max-width:920px;margin-inline:auto;padding:3rem 0">
+      <div>
+        <p class="eyebrow mb-2">What's included</p>
+        <h2 id="features-heading" style="font-family:var(--display);font-size:clamp(2rem,4.5vw,4rem);line-height:.9;margin-bottom:1rem">
+          Your plan features
+        </h2>
+        <p id="features-desc" style="color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:40ch"></p>
+      </div>
+      <div class="panel p-4 p-lg-5">
+        <ul id="features-list" class="list-unstyled mb-0"
+            style="font-family:var(--mono);font-size:.88rem;line-height:1;display:grid;gap:.9rem"></ul>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="d-flex gap-3 justify-content-center pb-5 flex-wrap">
+      <a class="btn btn-stream px-5 py-3 btn-lg" th:href="@{/}">▶ Start Watching</a>
+      <button class="btn btn-outline-light px-4 py-3 btn-lg" id="slip-btn" onclick="downloadSlip()">⬇ Download Slip</button>
+      <a class="btn btn-ghost px-4 py-3 btn-lg" th:href="@{/subscribe}">View Plans</a>
+    </div>
+
+  </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+const planMeta = {
+  BASIC:    { label:'Basic',    desc:'History, watchlist, and SD quality.', features:['Local folder streaming','Watch history','Watchlist','SD quality','1 simultaneous screen'] },
+  STANDARD: { label:'Standard', desc:'HD streaming on two screens with priority support.', features:['Everything in Basic','HD streaming','2 simultaneous screens','Priority support'] },
+  PREMIUM:  { label:'Premium',  desc:'The full experience — 4K, four screens, analytics, and offline.', features:['Everything in Standard','4K streaming','4 simultaneous screens','Admin analytics','Offline downloads'] }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const raw = sessionStorage.getItem('subscribeResult');
+  if (!raw) { window.location.href = '/subscribe'; return; }
+  const r = JSON.parse(raw);
+  sessionStorage.removeItem('subscribeResult');
+
+  const plan = planMeta[r.planName] || { label: r.planName, desc:'', features:[] };
+
+  document.getElementById('success-heading').textContent  = `Welcome to ${plan.label}.`;
+  document.getElementById('success-subtext').textContent  = `Your ${plan.label} plan is now active. ${plan.desc}`;
+  document.getElementById('s-plan').textContent           = plan.label;
+  document.getElementById('s-amount').textContent         = r.amount   ? '$'+parseFloat(r.amount).toFixed(2) : '—';
+  document.getElementById('s-method').textContent         = r.paymentMethod || '—';
+  document.getElementById('s-status').textContent         = r.status   || 'ACTIVE';
+  document.getElementById('s-start').textContent          = r.startDate ? fmt(r.startDate) : '—';
+  document.getElementById('s-end').textContent            = r.endDate   ? fmt(r.endDate)   : '—';
+  document.getElementById('s-txn').textContent            = r.transactionId || '—';
+
+  document.getElementById('features-heading').textContent = `${plan.label} plan`;
+  document.getElementById('features-desc').textContent    = plan.desc;
+
+  const list = document.getElementById('features-list');
+  plan.features.forEach(f => {
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.alignItems = 'center';
+    li.style.gap = '.65rem';
+    li.innerHTML = `<span style="color:var(--acid-green);font-size:.9rem;flex-shrink:0">✓</span><span style="color:var(--championship-white)">${f}</span>`;
+    list.appendChild(li);
+  });
+});
+
+function fmt(d) {
+  if (!d) return '—';
+  if (Array.isArray(d)) return `${d[0]}-${String(d[1]).padStart(2,'0')}-${String(d[2]).padStart(2,'0')}`;
+  return d;
+}
+
+function downloadSlip() {
+  const token = localStorage.getItem('streamflixToken');
+  const btn = document.getElementById('slip-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  fetch('/api/subscription/slip', {
+    headers: token ? { Authorization: 'Bearer ' + token } : {}
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Could not generate slip');
+    return res.blob();
+  })
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'streamflixtv-subscription-slip.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  })
+  .catch(err => alert(err.message))
+  .finally(() => { btn.disabled = false; btn.textContent = '⬇ Download Slip'; });
+}
+</script>
+</body>
+</html>

@@ -3,82 +3,165 @@
 <head th:replace="~{fragments/layout :: head('Pricing')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
+
 <main class="pt-5">
   <section class="page-section">
     <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">Subscription Experience</p>
+      <p class="section-kicker">Choose Your Plan</p>
       <div class="d-flex flex-column flex-lg-row justify-content-between gap-4 mb-5">
-        <h1 class="section-title">Pricing built for scale.</h1>
+        <h1 class="section-title">Stream without limits.</h1>
+        <p class="section-copy">Pick a plan and start watching in seconds. Cancel anytime.</p>
+      </div>
+
+      <!-- Active subscription banner (shown when logged in with a plan) -->
+      <div id="active-plan-banner" hidden
+           style="background:var(--acid-green-dim);border:1px solid rgba(143,254,9,.3);
+                  border-radius:var(--r-lg);padding:1.5rem 2rem;margin-bottom:2.5rem;
+                  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
         <div>
-          <p class="section-copy">Choose a plan, select demo PayPal or Stripe, and activate streaming features through the existing backend.</p>
-          <div class="btn-group mt-3" role="group" aria-label="Billing cycle">
-            <button class="btn btn-stream" type="button">Monthly</button>
-            <button class="btn btn-outline-light" type="button">Annual</button>
-          </div>
+          <p class="eyebrow mb-1">Your Current Plan</p>
+          <p id="active-plan-name" style="font-family:var(--display);font-size:1.8rem;margin:0;line-height:1">—</p>
+          <p id="active-plan-renews" style="font-family:var(--mono);font-size:.75rem;color:var(--text-muted);margin:.3rem 0 0">—</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-stream px-4" id="download-slip-btn" onclick="downloadSlip()">
+            ⬇ Download Slip
+          </button>
+          <a class="btn btn-outline-light px-4" th:href="@{/profile}">Manage →</a>
         </div>
       </div>
 
-      <div class="pricing-grid">
+      <!-- Plan cards -->
+      <div class="pricing-grid" id="plan-grid">
+
+        <!-- Free -->
         <article class="plan-card">
           <p class="eyebrow">Public</p>
           <h2>Free</h2>
-          <p class="plan-price">$0</p>
-          <p>Browse and stream local folder titles.</p>
+          <p class="plan-price mb-1">$0<span style="font-size:1rem;opacity:.6">/mo</span></p>
+          <ul class="list-unstyled mt-3 mb-4" style="font-family:var(--mono);font-size:0.8rem;flex:1">
+            <li class="mb-2">✓ Browse all titles</li>
+            <li class="mb-2">✓ Local folder streaming</li>
+            <li class="mb-2 text-muted-light">✗ Watch history</li>
+            <li class="mb-2 text-muted-light">✗ Watchlist</li>
+            <li class="mb-2 text-muted-light">✗ HD quality</li>
+          </ul>
           <a class="btn btn-outline-light mt-auto" th:href="@{/}">Start Watching</a>
         </article>
-        <article class="plan-card">
+
+        <!-- Basic -->
+        <article class="plan-card" id="plan-BASIC">
           <p class="eyebrow">Personal</p>
           <h2>Basic</h2>
-          <p class="plan-price">$7</p>
-          <p>Watchlist, history, and subscription status.</p>
-          <button class="btn btn-stream mt-auto" type="button" data-plan="BASIC">Subscribe</button>
+          <p class="plan-price mb-1">$7.99<span style="font-size:1rem;opacity:.6">/mo</span></p>
+          <ul class="list-unstyled mt-3 mb-4" style="font-family:var(--mono);font-size:0.8rem;flex:1">
+            <li class="mb-2">✓ Local folder streaming</li>
+            <li class="mb-2">✓ Watch history</li>
+            <li class="mb-2">✓ Watchlist</li>
+            <li class="mb-2">✓ SD quality</li>
+            <li class="mb-2 text-muted-light">✗ HD streaming</li>
+          </ul>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="BASIC" data-price="$7.99">Subscribe</button>
         </article>
-        <article class="plan-card">
+
+        <!-- Standard -->
+        <article class="plan-card" id="plan-STANDARD">
           <p class="eyebrow">Studio</p>
-          <h2>Premium</h2>
-          <p class="plan-price">$15</p>
-          <p>Premium profile with HD streaming posture.</p>
-          <button class="btn btn-stream mt-auto" type="button" data-plan="PREMIUM">Subscribe</button>
+          <h2>Standard</h2>
+          <p class="plan-price mb-1">$11.99<span style="font-size:1rem;opacity:.6">/mo</span></p>
+          <ul class="list-unstyled mt-3 mb-4" style="font-family:var(--mono);font-size:0.8rem;flex:1">
+            <li class="mb-2">✓ Everything in Basic</li>
+            <li class="mb-2">✓ HD streaming</li>
+            <li class="mb-2">✓ 2 screens at once</li>
+            <li class="mb-2">✓ Priority support</li>
+            <li class="mb-2 text-muted-light">✗ 4K quality</li>
+          </ul>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="STANDARD" data-price="$11.99">Subscribe</button>
         </article>
-        <article class="plan-card">
+
+        <!-- Premium -->
+        <article class="plan-card" id="plan-PREMIUM">
           <p class="eyebrow">Enterprise</p>
-          <h2>Ultimate</h2>
-          <p class="plan-price">$29</p>
-          <p>4K positioning, analytics, and admin operations.</p>
-          <button class="btn btn-stream mt-auto" type="button" data-plan="PREMIUM">Subscribe</button>
+          <h2>Premium</h2>
+          <p class="plan-price mb-1">$15.99<span style="font-size:1rem;opacity:.6">/mo</span></p>
+          <ul class="list-unstyled mt-3 mb-4" style="font-family:var(--mono);font-size:0.8rem;flex:1">
+            <li class="mb-2">✓ Everything in Standard</li>
+            <li class="mb-2">✓ 4K streaming</li>
+            <li class="mb-2">✓ 4 screens at once</li>
+            <li class="mb-2">✓ Admin analytics</li>
+            <li class="mb-2">✓ Offline downloads</li>
+          </ul>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="PREMIUM" data-price="$15.99">Subscribe</button>
         </article>
-      </div>
 
-      <section class="mono-panel mt-5">
-        <p class="section-kicker">Payment Rail</p>
-        <div class="d-flex flex-wrap gap-4 align-items-center">
-          <label class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" value="PAYPAL" checked>
-            <span class="form-check-label">PayPal demo adapter</span>
-          </label>
-          <label class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" value="STRIPE">
-            <span class="form-check-label">Stripe demo adapter</span>
-          </label>
-        </div>
-        <p id="subscription-result" class="mt-4 mb-0 text-muted-light"></p>
-      </section>
+      </div><!-- /pricing-grid -->
 
+      <!-- Feature comparison table -->
       <section class="page-section pb-0">
         <p class="section-kicker">Feature Matrix</p>
-        <table class="table table-dark table-striped">
-          <thead><tr><th>Capability</th><th>Free</th><th>Basic</th><th>Premium</th><th>Ultimate</th></tr></thead>
-          <tbody>
-          <tr><td>Local folder streaming</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
-          <tr><td>Watch history</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
-          <tr><td>Admin analytics</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
-          <tr><td>Quality posture</td><td>Public</td><td>SD</td><td>HD</td><td>4K</td></tr>
-          </tbody>
-        </table>
+        <div style="overflow-x:auto">
+          <table class="table table-dark table-striped" style="border-radius:var(--radius-lg);overflow:hidden">
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Free</th>
+                <th>Basic</th>
+                <th>Standard</th>
+                <th>Premium</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Local folder streaming</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+              <tr><td>Watch history</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+              <tr><td>Watchlist</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+              <tr><td>Quality</td><td>Public</td><td>SD</td><td>HD</td><td>4K</td></tr>
+              <tr><td>Simultaneous screens</td><td>1</td><td>1</td><td>2</td><td>4</td></tr>
+              <tr><td>Admin analytics</td><td>✗</td><td>✗</td><td>✗</td><td>✓</td></tr>
+              <tr><td>Offline downloads</td><td>✗</td><td>✗</td><td>✗</td><td>✓</td></tr>
+              <tr><td>Priority support</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
+
     </div>
   </section>
 </main>
+
+<!-- Payment modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--off-black);border:1px solid var(--line);border-radius:var(--radius-lg)">
+      <div class="modal-header" style="border-color:var(--line)">
+        <h5 class="modal-title" id="paymentModalLabel" style="font-family:var(--display)">Confirm Subscription</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-family:var(--mono);font-size:0.82rem;text-transform:uppercase;color:var(--acid-green)" id="modal-plan-name"></p>
+        <p class="mb-4" style="font-family:var(--display);font-size:2rem" id="modal-plan-price"></p>
+
+        <div class="alert-error mb-3" id="modal-error" hidden></div>
+
+        <p style="font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7" class="mb-2">Payment Method</p>
+        <div class="d-flex gap-3 mb-4">
+          <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-family:var(--mono);font-size:0.85rem">
+            <input class="form-check-input m-0" type="radio" name="paymentMethod" value="PAYPAL" checked>
+            PayPal
+          </label>
+          <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-family:var(--mono);font-size:0.85rem">
+            <input class="form-check-input m-0" type="radio" name="paymentMethod" value="STRIPE">
+            Stripe
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:var(--line)">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-stream px-4" id="confirm-subscribe-btn">Pay &amp; Subscribe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script th:src="@{/js/subscription.js}"></script>

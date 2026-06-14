@@ -2,50 +2,130 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Register')}"></head>
 <body>
-<main class="container min-vh-100 d-flex align-items-center justify-content-center">
-  <section class="panel p-4 w-100" style="max-width: 480px;">
-    <a class="brand-mark text-decoration-none d-block mb-4" th:href="@{/}">StreamFlixTv</a>
-    <h1 class="h3 mb-4">Register</h1>
-    <form id="register-form">
+
+<div class="auth-shell">
+  <!-- Editorial left panel -->
+  <div class="auth-editorial d-none d-lg-flex">
+    <div>
+      <a class="brand-mark text-decoration-none" th:href="@{/}">StreamFlixTv</a>
+      <h1 class="mt-4 mb-0">Start<br>streaming<br>today.</h1>
+      <p class="mt-4 text-muted-light" style="max-width:38ch; font-size:1.1rem;">
+        Join millions of viewers. Cancel anytime.
+      </p>
+    </div>
+  </div>
+
+  <!-- Form right panel -->
+  <div class="auth-form">
+    <a class="brand-mark text-decoration-none d-block d-lg-none mb-5" th:href="@{/}">StreamFlixTv</a>
+
+    <h2 class="mb-1" style="font-family:var(--display);font-size:clamp(2rem,4vw,3rem);">Create account</h2>
+    <p class="text-muted-light mb-4" style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;">
+      It's free to get started
+    </p>
+
+    <form id="register-form" novalidate>
+      <!-- Inline error / success messages -->
+      <div class="alert-error form-error-msg mb-3" id="register-error" hidden></div>
+
       <div class="mb-3">
-        <label class="form-label" for="fullName">Full Name</label>
-        <input id="fullName" name="fullName" class="form-control" required>
+        <label class="form-label" for="fullName"
+               style="font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">
+          Full Name
+        </label>
+        <input id="fullName" name="fullName" class="form-control"
+               placeholder="Jane Smith" autocomplete="name" required />
       </div>
+
       <div class="mb-3">
-        <label class="form-label" for="email">Email</label>
-        <input id="email" name="email" class="form-control" type="email" required>
+        <label class="form-label" for="email"
+               style="font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">
+          Email
+        </label>
+        <input id="email" name="email" class="form-control" type="email"
+               placeholder="you@example.com" autocomplete="email" required />
       </div>
+
       <div class="mb-3">
-        <label class="form-label" for="password">Password</label>
-        <input id="password" name="password" class="form-control" type="password" required>
+        <label class="form-label" for="password"
+               style="font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">
+          Password <span class="text-muted-light">(min. 6 characters)</span>
+        </label>
+        <input id="password" name="password" class="form-control" type="password"
+               placeholder="••••••••" autocomplete="new-password" minlength="6" required />
       </div>
+
       <div class="mb-4">
-        <label class="form-label" for="confirmPassword">Confirm Password</label>
-        <input id="confirmPassword" class="form-control" type="password" required>
+        <label class="form-label" for="confirmPassword"
+               style="font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">
+          Confirm Password
+        </label>
+        <input id="confirmPassword" name="confirmPassword" class="form-control" type="password"
+               placeholder="••••••••" autocomplete="new-password" required />
       </div>
-      <button class="btn btn-stream w-100" type="submit">Create Account</button>
-      <p class="mt-3 mb-0 text-muted-light">Already registered? <a th:href="@{/login}">Login</a></p>
+
+      <button class="btn btn-stream w-100 py-2" type="submit" id="register-btn">
+        Create Account
+      </button>
+
+      <p class="mt-4 mb-0 text-center text-muted-light" style="font-family:var(--mono);font-size:0.78rem;">
+        Already registered? <a th:href="@{/login}" style="color:var(--acid-green);">Sign in</a>
+      </p>
     </form>
-  </section>
-</main>
+  </div>
+</div>
+
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
-document.getElementById('register-form').addEventListener('submit', async event => {
-  event.preventDefault();
-  const form = new FormData(event.currentTarget);
-  if (form.get('password') !== document.getElementById('confirmPassword').value) {
-    alert('Passwords do not match');
-    return;
-  }
-  const data = await apiFetch('/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fullName: form.get('fullName'), email: form.get('email'), password: form.get('password') })
+  document.getElementById('register-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const btn = document.getElementById('register-btn');
+    const errorEl = document.getElementById('register-error');
+
+    errorEl.hidden = true;
+
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    if (password.length < 6) {
+      errorEl.textContent = 'Password must be at least 6 characters.';
+      errorEl.hidden = false;
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.hidden = false;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      const data = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: form.fullName.value.trim(),
+          email: form.email.value.trim(),
+          password: password,
+        }),
+      });
+      if (!data || !data.token) {
+        throw new Error('Registration failed. Please try again.');
+      }
+      localStorage.setItem('streamflixToken', data.token);
+      localStorage.setItem('streamflixUser', JSON.stringify(data));
+      window.location.href = '/subscribe';
+    } catch (error) {
+      errorEl.textContent = error.message || 'Registration failed. Please try again.';
+      errorEl.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
   });
-  localStorage.setItem('streamflixToken', data.token);
-  localStorage.setItem('streamflixUser', JSON.stringify(data));
-  window.location.href = '/subscribe';
-});
 </script>
 </body>
 </html>
