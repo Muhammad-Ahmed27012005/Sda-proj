@@ -40,10 +40,14 @@ public class SubscriptionController {
 		PaymentResultDTO payment = paymentService.processSubscriptionPayment(userId, request.planName(), request.paymentMethod());
 		// DESIGN PATTERN: Command
 		invoker.executeCommand(new SubscribePlanCommand(subscriptionService, userId, request.planName()));
+<<<<<<< HEAD
+		return ApiResponse.ok("Subscription active", Map.of("payment", payment, "subscription", subscriptionService.activeSubscription(userId).orElseThrow()));
+=======
 		Subscription subscription = subscriptionService.activeSubscription(userId).orElseThrow();
 		return ApiResponse.ok("Subscription active", Map.of(
 				"payment", payment,
 				"subscription", safeSubscription(subscription)));
+>>>>>>> f8f2b64a7cf8056373d1393f9863ae6fa14590cd
 	}
 
 	@PostMapping("/cancel")
@@ -60,6 +64,9 @@ public class SubscriptionController {
 		Subscription subscription = subscriptionService.activeSubscription(userId).orElse(null);
 		return ApiResponse.ok("Subscription status loaded", Map.of(
 				"active", subscription != null,
+<<<<<<< HEAD
+				"subscription", subscription == null ? "none" : subscription));
+=======
 				"subscription", subscription == null ? "none" : safeSubscription(subscription)));
 	}
 
@@ -70,5 +77,6 @@ public class SubscriptionController {
 				"startDate", subscription.getStartDate().toString(),
 				"endDate", subscription.getEndDate().toString(),
 				"status", subscription.getStatus());
+>>>>>>> f8f2b64a7cf8056373d1393f9863ae6fa14590cd
 	}
 }
