@@ -3,27 +3,320 @@
 <head th:replace="~{fragments/layout :: head('Profile')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
-<main class="container py-5">
-  <h1 class="h2 mb-4">Profile</h1>
-  <div class="row g-4">
-    <section class="col-lg-6">
-      <div class="panel p-4">
-        <h2 class="h5">Account</h2>
-        <input class="form-control mb-3" placeholder="Full name">
-        <input class="form-control mb-3" type="file">
-        <button class="btn btn-stream">Save</button>
-      </div>
-    </section>
-    <section class="col-lg-6">
-      <div class="panel p-4">
-        <h2 class="h5">Subscription</h2>
-        <p class="text-muted-light mb-3">Plan status appears after subscribing.</p>
-        <a class="btn btn-outline-light" th:href="@{/subscribe}">Manage Plan</a>
-      </div>
-    </section>
+
+<!-- ── Page hero ─────────────────────────────────────────── -->
+<div class="page-hero">
+  <div class="container-fluid px-4 px-xl-5">
+    <p class="eyebrow mb-3">Account</p>
+    <h1>Your Profile</h1>
   </div>
+</div>
+
+<main class="container-fluid px-4 px-xl-5 py-5" style="max-width:1200px">
+
+  <!-- Loading skeleton -->
+  <div id="profile-loading" class="text-center py-5">
+    <p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted)">Loading profile…</p>
+  </div>
+
+  <!-- Main layout (shown after load) -->
+  <div id="profile-wrap" hidden>
+
+    <!-- ── Top identity strip ─────────────────────────── -->
+    <div class="glass-panel p-4 p-lg-5 mb-4 d-flex flex-wrap align-items-center gap-4">
+      <!-- Avatar -->
+      <div id="avatar-wrap" style="position:relative;flex-shrink:0">
+        <div id="avatar-img-wrap" hidden
+             style="width:100px;height:100px;border-radius:50%;overflow:hidden;border:2px solid var(--acid-green)">
+          <img id="avatar-img" src="" alt="Profile photo" style="width:100%;height:100%;object-fit:cover">
+        </div>
+        <div id="avatar-initials"
+             style="width:100px;height:100px;border-radius:50%;background:var(--racing-green);
+                    display:grid;place-items:center;font-family:var(--display);font-size:2.4rem;
+                    font-weight:900;color:var(--championship-white);border:2px solid var(--acid-green);
+                    box-shadow:var(--glow-green)">?</div>
+      </div>
+
+      <!-- Name / email / badges -->
+      <div style="flex:1;min-width:0">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <h2 id="profile-name" style="font-family:var(--display);font-size:clamp(1.6rem,3vw,2.4rem);margin:0;line-height:1">—</h2>
+          <span id="role-badge" style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+                padding:.2rem .7rem;border-radius:999px;border:1px solid var(--line-strong);color:var(--text-muted)"></span>
+          <span id="plan-badge" hidden
+                style="font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+                       padding:.2rem .7rem;border-radius:999px;background:var(--acid-green);
+                       color:var(--off-black);font-weight:700;box-shadow:var(--glow-green)"></span>
+        </div>
+        <p id="profile-email" style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted);margin:0"></p>
+        <p id="profile-joined" style="font-family:var(--mono);font-size:.72rem;color:var(--text-dim);margin:.25rem 0 0"></p>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="d-flex gap-3 flex-wrap">
+        <div class="text-center" style="min-width:80px">
+          <div id="stat-watchlist" style="font-family:var(--display);font-size:2.2rem;line-height:1;
+               background:linear-gradient(135deg,var(--championship-white),var(--acid-green));
+               -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">—</div>
+          <div style="font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-top:.2rem">Watchlist</div>
+        </div>
+        <div style="width:1px;background:var(--line)"></div>
+        <div class="text-center" style="min-width:80px">
+          <div id="stat-history" style="font-family:var(--display);font-size:2.2rem;line-height:1;
+               background:linear-gradient(135deg,var(--championship-white),var(--acid-green));
+               -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">—</div>
+          <div style="font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-top:.2rem">Watched</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Two-column body ────────────────────────────── -->
+    <div class="row g-4">
+
+      <!-- Left: Edit form -->
+      <div class="col-lg-7">
+        <div class="panel p-4 p-lg-5 h-100">
+          <p class="eyebrow mb-2">Account Details</p>
+          <h3 style="font-family:var(--display);font-size:1.6rem;margin-bottom:2rem">Edit Profile</h3>
+
+          <form id="profile-form" enctype="multipart/form-data">
+            <div class="alert-error mb-4" id="profile-error" hidden></div>
+            <div class="alert-success mb-4" id="profile-success" hidden>✓ Profile updated successfully.</div>
+
+            <div class="mb-4">
+              <label class="form-label" for="fullName">Full Name</label>
+              <input id="fullName" name="fullName" class="form-control" placeholder="Your full name"
+                     style="font-size:.95rem;padding:.75rem 1rem">
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label" for="profileEmail">Email Address</label>
+              <input id="profileEmail" class="form-control" type="email" disabled
+                     style="font-size:.95rem;padding:.75rem 1rem;opacity:.5;cursor:not-allowed"
+                     title="Email cannot be changed">
+              <p style="font-family:var(--mono);font-size:.68rem;color:var(--text-dim);margin:.4rem 0 0">
+                Contact support to change your email.
+              </p>
+            </div>
+
+            <div class="mb-5">
+              <label class="form-label" for="profileImage">Profile Photo</label>
+              <div style="position:relative">
+                <input id="profileImage" name="image" class="form-control" type="file" accept="image/*"
+                       style="padding:.65rem 1rem;font-size:.85rem">
+              </div>
+              <p style="font-family:var(--mono);font-size:.68rem;color:var(--text-dim);margin:.4rem 0 0">
+                JPG or PNG. Max 5MB.
+              </p>
+            </div>
+
+            <div class="d-flex gap-3 align-items-center">
+              <button class="btn btn-stream px-5 py-2" type="submit" id="save-btn">Save Changes</button>
+              <button class="btn btn-ghost px-4 py-2" type="reset" id="reset-btn">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right: Subscription + quick links -->
+      <div class="col-lg-5 d-flex flex-column gap-4">
+
+        <!-- Subscription card -->
+        <div class="panel p-4 p-lg-5 flex-grow-1 d-flex flex-column">
+          <p class="eyebrow mb-2">Subscription</p>
+          <h3 style="font-family:var(--display);font-size:1.6rem;margin-bottom:1.5rem">Current Plan</h3>
+
+          <!-- Active sub -->
+          <div id="sub-active" hidden class="d-flex flex-column flex-grow-1">
+            <div style="background:var(--acid-green-dim);border:1px solid rgba(143,254,9,.28);
+                        border-radius:var(--r-md);padding:1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden">
+              <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;
+                           border-radius:50%;background:rgba(143,254,9,.08)"></div>
+              <p class="eyebrow mb-1">Active Plan</p>
+              <p id="sub-plan-name" style="font-family:var(--display);font-size:2.2rem;margin:0;line-height:1">—</p>
+            </div>
+
+            <div class="d-grid gap-2 mb-4" style="font-family:var(--mono);font-size:.8rem">
+              <div class="d-flex justify-content-between" style="padding:.6rem 0;border-bottom:1px solid var(--line)">
+                <span style="color:var(--text-dim)">Status</span>
+                <span id="sub-status" style="color:var(--acid-green);font-weight:600">ACTIVE</span>
+              </div>
+              <div class="d-flex justify-content-between" style="padding:.6rem 0;border-bottom:1px solid var(--line)">
+                <span style="color:var(--text-dim)">Renews</span>
+                <span id="sub-end-date" style="color:var(--championship-white)">—</span>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-auto">
+              <a class="btn btn-stream flex-fill text-center" th:href="@{/subscribe}">Upgrade Plan</a>
+              <button class="btn btn-danger-soft" id="cancel-sub-btn">Cancel</button>
+            </div>
+          </div>
+
+          <!-- No sub -->
+          <div id="sub-none" class="d-flex flex-column flex-grow-1">
+            <div style="border:1px dashed var(--line-strong);border-radius:var(--r-md);padding:1.75rem;
+                        text-align:center;margin-bottom:1.5rem">
+              <div style="font-size:2.5rem;margin-bottom:.75rem;opacity:.4">📺</div>
+              <p style="font-family:var(--mono);font-size:.8rem;color:var(--text-muted);margin:0">
+                No active subscription
+              </p>
+            </div>
+            <p style="color:var(--text-muted);font-size:.9rem;line-height:1.7;margin-bottom:1.5rem">
+              Unlock HD streaming, watch history, watchlist, and more with a paid plan.
+            </p>
+            <a class="btn btn-stream mt-auto text-center" th:href="@{/subscribe}">View Plans →</a>
+          </div>
+        </div>
+
+        <!-- Quick links card -->
+        <div class="panel p-4">
+          <p class="eyebrow mb-3">Quick Links</p>
+          <div class="d-grid gap-2">
+            <a class="btn btn-ghost text-start px-4 py-3" th:href="@{/watchlist}"
+               style="font-family:var(--mono);font-size:.78rem;letter-spacing:.04em">
+              🎬 &nbsp; My Watchlist
+            </a>
+            <a class="btn btn-ghost text-start px-4 py-3" th:href="@{/history}"
+               style="font-family:var(--mono);font-size:.78rem;letter-spacing:.04em">
+              📺 &nbsp; Watch History
+            </a>
+            <a class="btn btn-ghost text-start px-4 py-3" th:href="@{/subscribe}"
+               style="font-family:var(--mono);font-size:.78rem;letter-spacing:.04em">
+              💳 &nbsp; Manage Subscription
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  requireAuth();
+
+  try {
+    // Load full profile from API
+    const p = await apiFetch('/api/profile');
+
+    // Fill identity strip
+    const initials = (p.fullName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('avatar-initials').textContent = initials;
+
+    if (p.profileImage) {
+      document.getElementById('avatar-img').src = `/uploads/profiles/${p.profileImage}`;
+      document.getElementById('avatar-img-wrap').hidden   = false;
+      document.getElementById('avatar-initials').style.display = 'none';
+    }
+
+    document.getElementById('profile-name').textContent  = p.fullName  || '—';
+    document.getElementById('profile-email').textContent = p.email     || '—';
+    document.getElementById('role-badge').textContent    = p.role      || 'USER';
+
+    if (p.createdAt) {
+      const d = new Date(p.createdAt);
+      document.getElementById('profile-joined').textContent =
+        'Member since ' + d.toLocaleDateString('en-US', { year:'numeric', month:'long' });
+    }
+
+    // Stats
+    document.getElementById('stat-watchlist').textContent = p.watchlistCount ?? '0';
+    document.getElementById('stat-history').textContent   = p.historyCount   ?? '0';
+
+    // Plan badge in header
+    if (p.planName && p.planName !== 'FREE') {
+      const pb = document.getElementById('plan-badge');
+      pb.textContent = p.planName + ' Plan';
+      pb.hidden = false;
+    }
+
+    // Pre-fill form
+    document.getElementById('fullName').value      = p.fullName || '';
+    document.getElementById('profileEmail').value  = p.email   || '';
+
+    // Subscription section
+    if (p.subStatus === 'ACTIVE') {
+      document.getElementById('sub-plan-name').textContent = p.planName || '—';
+      document.getElementById('sub-end-date').textContent  = p.subEndDate || '—';
+      document.getElementById('sub-status').textContent    = 'ACTIVE';
+      document.getElementById('sub-active').hidden = false;
+      document.getElementById('sub-none').hidden   = true;
+    }
+
+    // Hide loading, show content
+    document.getElementById('profile-loading').hidden = true;
+    document.getElementById('profile-wrap').hidden    = false;
+
+  } catch (err) {
+    document.getElementById('profile-loading').innerHTML =
+      `<div class="alert-error mx-auto" style="max-width:480px">${err.message}</div>`;
+  }
+
+  // ── Save profile ────────────────────────────────────────
+  document.getElementById('profile-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn       = document.getElementById('save-btn');
+    const errorEl   = document.getElementById('profile-error');
+    const successEl = document.getElementById('profile-success');
+    errorEl.hidden = successEl.hidden = true;
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const fd = new FormData();
+      const name = document.getElementById('fullName').value.trim();
+      if (name) fd.append('fullName', name);
+      const img = document.getElementById('profileImage').files[0];
+      if (img) fd.append('image', img);
+
+      const updated = await apiFetch('/api/profile', { method: 'PUT', body: fd });
+
+      // Update displayed name
+      document.getElementById('profile-name').textContent = updated.fullName || name;
+      document.getElementById('avatar-initials').textContent =
+        (updated.fullName || name).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+      if (updated.profileImage) {
+        document.getElementById('avatar-img').src = `/uploads/profiles/${updated.profileImage}`;
+        document.getElementById('avatar-img-wrap').hidden = false;
+        document.getElementById('avatar-initials').style.display = 'none';
+      }
+
+      // Sync localStorage
+      const stored = currentUser() || {};
+      stored.fullName = updated.fullName || stored.fullName;
+      localStorage.setItem('streamflixUser', JSON.stringify(stored));
+      document.querySelectorAll('[data-user-name]').forEach(el => { el.textContent = stored.fullName; });
+
+      successEl.hidden = false;
+      setTimeout(() => { successEl.hidden = true; }, 4000);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  });
+
+  // ── Cancel subscription ─────────────────────────────────
+  document.getElementById('cancel-sub-btn')?.addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to cancel your subscription?')) return;
+    try {
+      await apiFetch('/api/subscription/cancel', { method: 'POST' });
+      document.getElementById('sub-active').hidden = true;
+      document.getElementById('sub-none').hidden   = false;
+      document.getElementById('plan-badge').hidden = true;
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+});
+</script>
 </body>
 </html>

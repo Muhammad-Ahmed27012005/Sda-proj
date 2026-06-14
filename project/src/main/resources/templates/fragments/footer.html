@@ -1,6 +1,78 @@
-<footer class="py-4 mt-5 border-top border-secondary" xmlns:th="http://www.thymeleaf.org" th:fragment="footer">
-  <div class="container text-muted-light small">
-    <span>StreamFlixTv</span>
-    <span class="ms-2">Software Design &amp; Architecture</span>
+<footer xmlns:th="http://www.thymeleaf.org" th:fragment="footer">
+  <div class="container-fluid px-4 px-xl-5">
+
+    <div class="row g-5 py-5" style="border-bottom:1px solid var(--line)">
+
+      <!-- Brand + description -->
+      <div class="col-lg-4">
+        <a class="footer-brand d-block text-decoration-none mb-3" th:href="@{/}">StreamFlixTv</a>
+        <p style="font-family:var(--mono);font-size:.75rem;color:var(--text-dim);max-width:30ch;line-height:1.8">
+          Premium streaming infrastructure for local media libraries, businesses, and creators.
+        </p>
+        <!-- Social links -->
+        <div class="d-flex gap-3 mt-4">
+          <a href="#" class="social-icon" title="Twitter / X">𝕏</a>
+          <a href="#" class="social-icon" title="GitHub">⌥</a>
+          <a href="#" class="social-icon" title="YouTube">▶</a>
+          <a href="#" class="social-icon" title="Instagram">◈</a>
+        </div>
+      </div>
+
+      <!-- Platform links -->
+      <div class="col-6 col-lg-2">
+        <p class="eyebrow mb-3">Platform</p>
+        <ul class="list-unstyled vstack gap-2">
+          <li><a class="footer-link" th:href="@{/}">🏠 Browse</a></li>
+          <li><a class="footer-link" th:href="@{/#categories}">🎬 Categories</a></li>
+          <li><a class="footer-link" th:href="@{/subscribe}">💳 Pricing</a></li>
+          <li><a class="footer-link" th:href="@{/watchlist}">❤️ Watchlist</a></li>
+          <li><a class="footer-link" th:href="@{/history}">📺 History</a></li>
+        </ul>
+      </div>
+
+      <!-- Account -->
+      <div class="col-6 col-lg-2">
+        <p class="eyebrow mb-3">Account</p>
+        <ul class="list-unstyled vstack gap-2">
+          <li><a class="footer-link" th:href="@{/register}">✨ Sign Up</a></li>
+          <li><a class="footer-link" th:href="@{/login}">🔑 Login</a></li>
+          <li><a class="footer-link" th:href="@{/profile}">👤 Profile</a></li>
+          <li><a class="footer-link" th:href="@{/subscribe}">⬆ Upgrade Plan</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div class="col-6 col-lg-2">
+        <p class="eyebrow mb-3">Company</p>
+        <ul class="list-unstyled vstack gap-2">
+          <li><a class="footer-link" href="#">ℹ About Us</a></li>
+          <li><a class="footer-link" href="#">📧 Contact</a></li>
+          <li><a class="footer-link" href="#">💼 Careers</a></li>
+          <li><a class="footer-link" href="#">📰 Blog</a></li>
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div class="col-6 col-lg-2">
+        <p class="eyebrow mb-3">Legal</p>
+        <ul class="list-unstyled vstack gap-2">
+          <li><a class="footer-link" href="#">🛡 Privacy Policy</a></li>
+          <li><a class="footer-link" href="#">📄 Terms of Service</a></li>
+          <li><a class="footer-link" href="#">🍪 Cookie Policy</a></li>
+          <li><a class="footer-link" href="#">♿ Accessibility</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center py-4 gap-2">
+      <p class="footer-copy mb-0">© 2025 StreamFlixTv — Software Design &amp; Architecture Project</p>
+      <div class="d-flex gap-3">
+        <span class="footer-copy">🌐 English</span>
+        <span class="footer-copy">Built with Spring Boot · Thymeleaf · Bootstrap 5</span>
+      </div>
+    </div>
+
   </div>
 </footer>

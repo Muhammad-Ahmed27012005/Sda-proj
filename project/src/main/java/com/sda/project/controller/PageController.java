@@ -26,6 +26,11 @@ public class PageController {
 		return "subscription";
 	}
 
+	@GetMapping("/subscribe/success")
+	public String subscribeSuccess() {
+		return "subscribe-success";
+	}
+
 	@GetMapping("/videos/{id}")
 	public String videoDetail(@PathVariable Long id) {
 		return "video-detail";

@@ -1,171 +1,264 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Streaming Infrastructure')}"></head>
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
+<!-- ── Hero ──────────────────────────────────────────────── -->
 <header class="hero">
   <div class="container-fluid px-4 px-xl-5 hero-grid">
     <div>
-      <p class="hero-kicker">Premium media infrastructure / local library</p>
-      <h1 class="hero-title">STREAM<br>WITHOUT<br>LIMITS.</h1>
-      <p class="hero-copy">Enterprise-grade streaming infrastructure for creators, businesses, and viewers. Drop an MP4 into the movies folder and the platform publishes it automatically.</p>
-      <div class="d-flex flex-wrap gap-2 mt-4">
-        <a class="btn btn-stream btn-lg" href="#library">Start Watching</a>
-        <a class="btn btn-outline-light btn-lg" href="#featured">Explore Library</a>
+      <p class="hero-kicker">Premium Streaming Platform</p>
+      <h1 class="hero-title">STREAM WITHOUT LIMITS.</h1>
+      <p class="hero-copy">
+        Watch movies and shows in stunning 4K. Drop an MP4 into the movies folder
+        and it's live — instantly playable, beautifully presented.
+      </p>
+      <div class="d-flex flex-wrap gap-3 mt-5">
+        <a class="btn btn-stream btn-lg px-5 py-3" href="#trending">🎬 Start Watching</a>
+        <a class="btn btn-outline-light btn-lg px-4 py-3" href="#categories">Browse Genres</a>
       </div>
     </div>
     <aside class="hero-panel">
-      <div class="hero-metric"><strong id="movie-count">0</strong><span class="eyebrow">Local assets online</span></div>
-      <div class="hero-metric"><strong>206</strong><span class="eyebrow">Range streaming ready</span></div>
-      <div class="hero-metric"><strong>4K</strong><span class="eyebrow">Premium delivery posture</span></div>
+      <div class="hero-metric">
+        <strong id="movie-count">—</strong>
+        <span class="eyebrow">Titles Online</span>
+      </div>
+      <div class="hero-metric">
+        <strong>4K</strong>
+        <span class="eyebrow">Ultra HD Quality</span>
+      </div>
+      <div class="hero-metric">
+        <strong>24/7</strong>
+        <span class="eyebrow">Always Streaming</span>
+      </div>
     </aside>
   </div>
 </header>
 
+<!-- ── Live search results (hidden by default) ─────────── -->
+<div id="search-results-section" hidden
+     style="background:var(--surface);border-bottom:1px solid var(--line);padding:2rem 0">
+  <div class="container-fluid px-4 px-xl-5">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <p class="eyebrow mb-0">Search Results — <span id="search-query-label"></span></p>
+      <button class="btn btn-ghost btn-sm" onclick="clearSearch()">✕ Clear</button>
+    </div>
+    <div id="search-row" class="content-row"></div>
+  </div>
+</div>
+
 <main>
-  <section class="page-section py-4">
+
+  <!-- ── Trusted strip ────────────────────────────────── -->
+  <section class="page-section py-0" style="border-top:none">
     <div class="trusted-strip">
-      <span>Creators</span>
-      <span>Studios</span>
-      <span>Publishers</span>
-      <span>Live Teams</span>
-      <span>Enterprises</span>
+      <span>🎬 Movies</span><span>📺 Series</span><span>🎵 Music</span>
+      <span>🚀 Sci-Fi</span><span>🔥 Action</span>
     </div>
   </section>
 
-  <section id="featured" class="page-section">
+  <!-- ── Trending Now ──────────────────────────────────── -->
+  <section id="trending" class="page-section">
     <div class="container-fluid px-4 px-xl-5">
-      <div class="d-flex flex-column flex-lg-row justify-content-between gap-4 mb-4">
+      <div class="section-tabs d-flex align-items-end justify-content-between mb-5 flex-wrap gap-3">
         <div>
-          <p class="section-kicker">Featured Content</p>
-          <h2 class="section-title">A living catalog, published from disk.</h2>
+          <p class="section-kicker">Discover</p>
+          <h2 class="section-title">What to Watch</h2>
         </div>
-        <p class="section-copy">Every file in <span class="eyebrow">project/upload/movies</span> becomes a playable title. No manual API import. No metadata ceremony. Just add video.</p>
+        <div class="d-flex gap-2" role="tablist">
+          <button class="tab-btn active" data-tab="trending-row">🔥 Trending</button>
+          <button class="tab-btn" data-tab="toprated-row">⭐ Top Rated</button>
+          <button class="tab-btn" data-tab="recent-row">🆕 New Releases</button>
+        </div>
       </div>
+
+      <!-- Tab panels -->
       <div class="slider-shell">
-        <div id="featured-slider" class="content-row featured-slider"></div>
+        <div id="trending-row"  class="content-row tab-panel"></div>
+        <div id="toprated-row"  class="content-row tab-panel" hidden></div>
+        <div id="recent-row"    class="content-row tab-panel" hidden></div>
       </div>
     </div>
   </section>
 
-  <section id="categories" class="page-section">
-    <div class="container-fluid px-4 px-xl-5 split-section">
-      <div>
-        <p class="section-kicker">Categories</p>
-        <h2 class="section-title">Editorial navigation for modern libraries.</h2>
-      </div>
-      <div id="category-row" class="d-flex flex-wrap gap-2"></div>
-    </div>
-  </section>
-
-  <section id="live" class="page-section">
-    <div class="container-fluid px-4 px-xl-5 split-section">
-      <div class="mono-panel">
-        <p class="eyebrow">Live Streaming Showcase</p>
-        <h2 class="section-title">Broadcast posture. Cinematic surface.</h2>
-      </div>
-      <div class="data-grid">
-        <div class="data-cell"><strong>99.9</strong><span class="eyebrow">% uptime target</span></div>
-        <div class="data-cell"><strong>24</strong><span class="eyebrow">fps to 60fps</span></div>
-        <div class="data-cell"><strong>CDN</strong><span class="eyebrow">global delivery</span></div>
-        <div class="data-cell"><strong>DRM</strong><span class="eyebrow">security layer</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="library" class="page-section">
+  <!-- ── Continue Watching (auth only) ─────────────────── -->
+  <section id="continue-section" class="page-section" hidden>
     <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">Trending Content</p>
-      <h2 class="section-title mb-4">Now sliding in the library.</h2>
-      <div class="slider-shell">
-        <div id="trending-row" class="content-row"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="page-section">
-    <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">Continue Watching</p>
-      <h2 class="section-title mb-4">Resume the signal.</h2>
+      <p class="section-kicker">Pick Up Where You Left Off</p>
+      <h2 class="section-title mb-5">Continue Watching</h2>
       <div class="slider-shell">
         <div id="continue-row" class="content-row"></div>
       </div>
     </div>
   </section>
 
-  <section class="page-section">
-    <div class="container-fluid px-4 px-xl-5 split-section">
-      <div>
-        <p class="section-kicker">Recommendations Engine</p>
-        <h2 class="section-title">Designed for discovery without noise.</h2>
-      </div>
-      <p class="section-copy">The interface prioritizes strong hierarchy, title-first scanning, instant playback, and compact metadata for fast decisions.</p>
+  <!-- ── Categories with icons ─────────────────────────── -->
+  <section id="categories" class="page-section">
+    <div class="container-fluid px-4 px-xl-5">
+      <p class="section-kicker">Browse by Genre</p>
+      <h2 class="section-title mb-5">Categories</h2>
+      <div id="category-row" class="d-flex flex-wrap gap-3"></div>
     </div>
   </section>
 
-  <section class="page-section">
+  <!-- ── Featured slider ───────────────────────────────── -->
+  <section id="featured" class="page-section">
     <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">Recently Added</p>
-      <h2 class="section-title mb-4">Fresh from the folder.</h2>
+      <p class="section-kicker">Hand-picked for You</p>
+      <h2 class="section-title mb-5">Featured Titles</h2>
       <div class="slider-shell">
-        <div id="recent-row" class="content-row"></div>
+        <div id="featured-slider" class="content-row featured-slider"></div>
       </div>
     </div>
   </section>
 
-  <section class="page-section">
+  <!-- ── Famous Movie Trailers ─────────────────────────── -->
+  <section id="trailers" class="page-section">
     <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">Subscription Plans</p>
-      <div class="pricing-grid">
-        <article class="plan-card"><h2>Free</h2><p class="plan-price">$0</p><p>Public playback and catalog browsing.</p></article>
-        <article class="plan-card"><h2>Basic</h2><p class="plan-price">$7</p><p>Watchlist, history, and SD profile.</p></article>
-        <article class="plan-card"><h2>Premium</h2><p class="plan-price">$15</p><p>HD playback posture and expanded account tools.</p></article>
-        <article class="plan-card"><h2>Ultimate</h2><p class="plan-price">$29</p><p>4K positioning, admin analytics, and priority catalog operations.</p></article>
+      <p class="section-kicker">Hollywood &amp; Streaming Hits</p>
+      <h2 class="section-title mb-2">Now Famous</h2>
+      <p class="section-copy mb-5">Iconic blockbusters you can't miss — add similar titles to your library.</p>
+
+      <!-- Genre filter -->
+      <div class="d-flex gap-2 flex-wrap mb-5" id="trailer-genre-tabs">
+        <button class="tab-btn active" data-genre="all">All</button>
+        <button class="tab-btn" data-genre="action">🔥 Action</button>
+        <button class="tab-btn" data-genre="drama">🎭 Drama</button>
+        <button class="tab-btn" data-genre="scifi">🚀 Sci-Fi</button>
+        <button class="tab-btn" data-genre="animation">🎨 Animation</button>
+        <button class="tab-btn" data-genre="horror">👻 Horror</button>
       </div>
+
+      <div id="trailers-grid" class="trailers-grid"></div>
     </div>
   </section>
 
+  <!-- ── Platform stats ────────────────────────────────── -->
   <section class="page-section">
     <div class="container-fluid px-4 px-xl-5 split-section">
-      <div><p class="section-kicker">Analytics Preview</p><h2 class="section-title">Operational clarity for every stream.</h2></div>
+      <div class="mono-panel">
+        <p class="eyebrow mb-3">Why StreamFlixTv</p>
+        <h2 class="section-title" style="font-size:clamp(2rem,4vw,4rem)">
+          Built like infrastructure.<br>Feels like cinema.
+        </h2>
+        <p class="mt-4" style="color:var(--text-muted);font-size:1rem;line-height:1.8">
+          Range-request byte streaming, JWT-secured endpoints,
+          Spring Security, JPA-backed watchlists and real-time watch history.
+        </p>
+        <div class="d-flex gap-3 mt-4 flex-wrap">
+          <a class="btn btn-stream px-4" th:href="@{/subscribe}">Get Started →</a>
+          <a class="btn btn-ghost px-4" th:href="@{/#trending}">Browse Library</a>
+        </div>
+      </div>
       <div class="data-grid">
-        <div class="data-cell"><strong>12K</strong><span class="eyebrow">play events</span></div>
-        <div class="data-cell"><strong>84%</strong><span class="eyebrow">completion</span></div>
-        <div class="data-cell"><strong>42ms</strong><span class="eyebrow">edge timing</span></div>
-        <div class="data-cell"><strong>6</strong><span class="eyebrow">active assets</span></div>
+        <div class="data-cell"><strong>500+</strong><span class="eyebrow">Titles Available</span></div>
+        <div class="data-cell"><strong>4K</strong><span class="eyebrow">Ultra HD</span></div>
+        <div class="data-cell"><strong>24/7</strong><span class="eyebrow">Always On</span></div>
+        <div class="data-cell"><strong>DRM</strong><span class="eyebrow">Secured</span></div>
       </div>
     </div>
   </section>
 
-  <section class="page-section">
-    <div class="container-fluid px-4 px-xl-5 split-section">
-      <div class="mono-panel"><p class="section-kicker">Admin Capabilities</p><h2 class="section-title">Upload. Measure. Govern.</h2></div>
-      <div class="mono-panel"><p class="section-kicker">Security & DRM</p><h2 class="section-title">Access control without visual compromise.</h2></div>
-    </div>
-  </section>
-
-  <section class="page-section">
-    <div class="container-fluid px-4 px-xl-5 split-section">
-      <div><p class="section-kicker">Global Delivery Network</p><h2 class="section-title">Built like infrastructure. Felt like cinema.</h2></div>
-      <div>
-        <p class="section-copy">A premium streaming ecosystem for local media libraries, class projects, demos, and business-grade media surfaces.</p>
-        <blockquote class="mt-5 fs-2">"The interface feels like a media company, not a coursework prototype."</blockquote>
-        <p class="eyebrow">Studio Operations Review</p>
-      </div>
-    </div>
-  </section>
-
+  <!-- ── Pricing preview ───────────────────────────────── -->
   <section class="page-section">
     <div class="container-fluid px-4 px-xl-5">
-      <p class="section-kicker">FAQ</p>
-      <div class="row g-4">
-        <div class="col-lg-4"><h3 class="h2">How do I add a movie?</h3><p class="text-muted-light">Place an MP4 file in project/upload/movies and refresh the home page.</p></div>
-        <div class="col-lg-4"><h3 class="h2">Where does the title come from?</h3><p class="text-muted-light">The title is generated from the filename without the extension.</p></div>
-        <div class="col-lg-4"><h3 class="h2">Is an external API required?</h3><p class="text-muted-light">No. The library now runs from your local movies folder.</p></div>
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-4 mb-5 align-items-end">
+        <div>
+          <p class="section-kicker">Subscription Plans</p>
+          <h2 class="section-title">One price. Unlimited access.</h2>
+        </div>
+        <a class="btn btn-outline-light px-5 py-2" th:href="@{/subscribe}">View All Plans →</a>
+      </div>
+      <div class="pricing-grid">
+        <article class="plan-card">
+          <p class="eyebrow">Free</p>
+          <h2>Free</h2>
+          <p class="plan-price">$0<span style="font-size:1rem;opacity:.5">/mo</span></p>
+          <ul class="plan-features">
+            <li>✔ Browse all titles</li>
+            <li>✔ Local streaming</li>
+            <li class="dim">✗ Watch history</li>
+            <li class="dim">✗ HD quality</li>
+          </ul>
+          <a class="btn btn-outline-light mt-auto" th:href="@{/}">Start Free</a>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Personal</p>
+          <h2>Basic</h2>
+          <p class="plan-price">$7.99<span style="font-size:1rem;opacity:.5">/mo</span></p>
+          <ul class="plan-features">
+            <li>✔ Watchlist &amp; History</li>
+            <li>✔ SD Streaming</li>
+            <li>✔ 1 Device</li>
+            <li class="dim">✗ HD quality</li>
+          </ul>
+          <a class="btn btn-stream mt-auto" th:href="@{/subscribe}">Get Basic</a>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Studio</p>
+          <h2>Standard</h2>
+          <p class="plan-price">$11.99<span style="font-size:1rem;opacity:.5">/mo</span></p>
+          <ul class="plan-features">
+            <li>✔ Everything in Basic</li>
+            <li>✔ HD Streaming</li>
+            <li>✔ 2 Devices</li>
+            <li>✔ Priority Support</li>
+          </ul>
+          <a class="btn btn-stream mt-auto" th:href="@{/subscribe}">Get Standard</a>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Enterprise</p>
+          <h2>Premium</h2>
+          <p class="plan-price">$15.99<span style="font-size:1rem;opacity:.5">/mo</span></p>
+          <ul class="plan-features">
+            <li>✔ 4K Ultra HD</li>
+            <li>✔ 4 Devices</li>
+            <li>✔ Downloads</li>
+            <li>✔ Admin Analytics</li>
+          </ul>
+          <a class="btn btn-stream mt-auto" th:href="@{/subscribe}">Get Premium</a>
+        </article>
       </div>
     </div>
   </section>
+
+  <!-- ── FAQ ────────────────────────────────────────────── -->
+  <section class="page-section">
+    <div class="container-fluid px-4 px-xl-5">
+      <p class="section-kicker mb-5">Frequently Asked Questions</p>
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="panel p-4 h-100">
+            <div style="font-size:2rem;margin-bottom:.75rem">🎬</div>
+            <h3 style="font-family:var(--display);font-size:1.4rem;margin-bottom:.75rem">How do I add a movie?</h3>
+            <p style="color:var(--text-muted);font-size:.93rem;margin:0;line-height:1.7">
+              Place any MP4 inside <code class="eyebrow" style="background:var(--acid-green-dim);padding:.15rem .4rem;border-radius:.25rem">upload/movies</code> and refresh — it's live instantly.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel p-4 h-100">
+            <div style="font-size:2rem;margin-bottom:.75rem">📛</div>
+            <h3 style="font-family:var(--display);font-size:1.4rem;margin-bottom:.75rem">Where does the title come from?</h3>
+            <p style="color:var(--text-muted);font-size:.93rem;margin:0;line-height:1.7">
+              Auto-generated from the filename. Rename the file to rename the title.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel p-4 h-100">
+            <div style="font-size:2rem;margin-bottom:.75rem">🌐</div>
+            <h3 style="font-family:var(--display);font-size:1.4rem;margin-bottom:.75rem">Is an external API needed?</h3>
+            <p style="color:var(--text-muted);font-size:.93rem;margin:0;line-height:1.7">
+              No. Everything runs locally — no third-party CDN or metadata provider required.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
@@ -175,8 +268,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const videos = await apiFetch('/api/videos');
-    document.getElementById('movie-count').textContent = videos.length;
-  } catch (error) {}
+    document.getElementById('movie-count').textContent = videos.length || '0';
+  } catch (_) {
+    document.getElementById('movie-count').textContent = '0';
+  }
 });
 </script>
 </body>

@@ -3,6 +3,7 @@ package com.sda.project.exception;
 import jakarta.validation.ValidationException;
 import java.time.Instant;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,7 +27,16 @@ public class GlobalExceptionHandler {
 		return error(HttpStatus.PAYMENT_REQUIRED, "Subscription Required", ex.getMessage());
 	}
 
-	@ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class, IllegalArgumentException.class})
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<Map<String, Object>> validationError(MethodArgumentNotValidException ex) {
+		String message = ex.getBindingResult().getFieldErrors().stream()
+				.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+				.collect(Collectors.joining(", "));
+		if (message.isBlank()) message = "Validation failed";
+		return error(HttpStatus.BAD_REQUEST, "Bad Request", message);
+	}
+
+	@ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
 	public ResponseEntity<Map<String, Object>> badRequest(Exception ex) {
 		return error(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
 	}
@@ -38,8 +48,9 @@ public class GlobalExceptionHandler {
 
 	private ResponseEntity<Map<String, Object>> error(HttpStatus status, String error, String message) {
 		return ResponseEntity.status(status).body(Map.of(
+				"success", false,
 				"error", error,
 				"message", message == null ? status.getReasonPhrase() : message,
-				"timestamp", Instant.now().toString()));
+				"timestamp", Instant.now()));
 	}
 }
