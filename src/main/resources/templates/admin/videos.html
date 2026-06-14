@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Videos')}"></head>
+<body data-admin-page>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container py-5">
+  <h1 class="h2 mb-4">Video Management</h1>
+  <section class="panel p-4 mb-4">
+    <h2 class="h5">Add Video</h2>
+    <form id="upload-form" class="row g-3">
+      <div class="col-md-6"><input class="form-control" name="title" placeholder="Title" required></div>
+      <div class="col-md-6"><input class="form-control" name="genre" placeholder="Genre"></div>
+      <div class="col-md-6"><input class="form-control" name="videoFile" type="file" accept="video/mp4" required></div>
+      <div class="col-md-6"><input class="form-control" name="thumbnailFile" type="file" accept="image/*"></div>
+      <div class="col-12"><textarea class="form-control" name="description" placeholder="Description"></textarea></div>
+      <div class="col-12"><button class="btn btn-stream" type="submit">Upload</button></div>
+    </form>
+  </section>
+  <section class="panel p-4">
+    <h2 class="h5">Library</h2>
+    <div id="admin-video-list" class="content-row"></div>
+  </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/admin.js}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const list = await apiFetch('/api/videos');
+  document.getElementById('admin-video-list').innerHTML = list.map(videoCard).join('');
+  document.getElementById('upload-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    await fetch('/api/videos/upload', { method: 'POST', headers: authHeaders(), body: new FormData(event.currentTarget) });
+    location.reload();
+  });
+});
+</script>
+</body>
+</html>

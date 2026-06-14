@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pricing')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="pt-5">
+  <section class="page-section">
+    <div class="container-fluid px-4 px-xl-5">
+      <p class="section-kicker">Subscription Experience</p>
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-4 mb-5">
+        <h1 class="section-title">Pricing built for scale.</h1>
+        <div>
+          <p class="section-copy">Choose a plan, select demo PayPal or Stripe, and activate streaming features through the existing backend.</p>
+          <div class="btn-group mt-3" role="group" aria-label="Billing cycle">
+            <button class="btn btn-stream" type="button">Monthly</button>
+            <button class="btn btn-outline-light" type="button">Annual</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-grid">
+        <article class="plan-card">
+          <p class="eyebrow">Public</p>
+          <h2>Free</h2>
+          <p class="plan-price">$0</p>
+          <p>Browse and stream local folder titles.</p>
+          <a class="btn btn-outline-light mt-auto" th:href="@{/}">Start Watching</a>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Personal</p>
+          <h2>Basic</h2>
+          <p class="plan-price">$7</p>
+          <p>Watchlist, history, and subscription status.</p>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="BASIC">Subscribe</button>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Studio</p>
+          <h2>Premium</h2>
+          <p class="plan-price">$15</p>
+          <p>Premium profile with HD streaming posture.</p>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="PREMIUM">Subscribe</button>
+        </article>
+        <article class="plan-card">
+          <p class="eyebrow">Enterprise</p>
+          <h2>Ultimate</h2>
+          <p class="plan-price">$29</p>
+          <p>4K positioning, analytics, and admin operations.</p>
+          <button class="btn btn-stream mt-auto" type="button" data-plan="PREMIUM">Subscribe</button>
+        </article>
+      </div>
+
+      <section class="mono-panel mt-5">
+        <p class="section-kicker">Payment Rail</p>
+        <div class="d-flex flex-wrap gap-4 align-items-center">
+          <label class="form-check">
+            <input class="form-check-input" type="radio" name="paymentMethod" value="PAYPAL" checked>
+            <span class="form-check-label">PayPal demo adapter</span>
+          </label>
+          <label class="form-check">
+            <input class="form-check-input" type="radio" name="paymentMethod" value="STRIPE">
+            <span class="form-check-label">Stripe demo adapter</span>
+          </label>
+        </div>
+        <p id="subscription-result" class="mt-4 mb-0 text-muted-light"></p>
+      </section>
+
+      <section class="page-section pb-0">
+        <p class="section-kicker">Feature Matrix</p>
+        <table class="table table-dark table-striped">
+          <thead><tr><th>Capability</th><th>Free</th><th>Basic</th><th>Premium</th><th>Ultimate</th></tr></thead>
+          <tbody>
+          <tr><td>Local folder streaming</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Watch history</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Admin analytics</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Quality posture</td><td>Public</td><td>SD</td><td>HD</td><td>4K</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </section>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/subscription.js}"></script>
+</body>
+</html>

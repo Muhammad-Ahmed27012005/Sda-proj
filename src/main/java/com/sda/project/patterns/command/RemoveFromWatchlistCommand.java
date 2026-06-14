@@ -1,0 +1,25 @@
+package com.sda.project.patterns.command;
+
+import com.sda.project.service.WatchlistService;
+
+public class RemoveFromWatchlistCommand implements Command {
+	private final WatchlistService watchlistService;
+	private final Long userId;
+	private final Long videoId;
+
+	public RemoveFromWatchlistCommand(WatchlistService watchlistService, Long userId, Long videoId) {
+		this.watchlistService = watchlistService;
+		this.userId = userId;
+		this.videoId = videoId;
+	}
+
+	@Override
+	public void execute() {
+		watchlistService.remove(userId, videoId);
+	}
+
+	@Override
+	public void undo() {
+		watchlistService.add(userId, videoId);
+	}
+}

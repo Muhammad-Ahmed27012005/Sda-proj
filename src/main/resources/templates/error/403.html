@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Forbidden')}"></head>
+<body>
+<main class="container min-vh-100 d-flex align-items-center justify-content-center text-center">
+  <section>
+    <h1 class="display-3">403</h1>
+    <p class="text-muted-light">This area requires a different account role.</p>
+    <a class="btn btn-stream" th:href="@{/login}">Login</a>
+  </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
