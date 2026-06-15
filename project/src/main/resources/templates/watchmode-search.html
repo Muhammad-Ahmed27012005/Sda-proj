@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Movie Search')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main style="padding-top:5rem">
+
+  <!-- ── Search hero ─────────────────────────────────────── -->
+  <section class="page-section" style="padding-bottom:1rem">
+    <div class="container-fluid px-4 px-xl-5">
+      <p class="section-kicker">Powered by Watchmode</p>
+      <h1 class="section-title mb-4">Find Any Movie or Show</h1>
+
+      <form id="wm-search-form" onsubmit="return false">
+        <div class="d-flex gap-2 flex-wrap align-items-center" style="max-width:640px">
+          <input
+            id="wm-input"
+            class="form-control"
+            type="search"
+            placeholder="e.g. Breaking Bad, Dune, The Mandalorian…"
+            autocomplete="off"
+            style="flex:1;min-width:260px"
+          >
+          <button id="wm-btn" class="btn btn-stream px-4" type="submit">
+            🔍 Search
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Status / loader ────────────────────────────────── -->
+  <section class="page-section" style="padding-top:1rem">
+    <div class="container-fluid px-4 px-xl-5">
+      <p id="wm-status" style="font-family:var(--mono);font-size:.85rem;color:var(--text-muted)" hidden></p>
+
+      <!-- Results grid -->
+      <div id="wm-results" class="wm-grid"></div>
+
+      <!-- Detail panel (shown after clicking a result) -->
+      <div id="wm-detail" class="wm-detail-panel" hidden>
+        <button class="btn btn-ghost btn-sm mb-4" onclick="closeDetail()">← Back to results</button>
+        <div id="wm-detail-inner"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/watchmode.js}"></script>
+</body>
+</html>

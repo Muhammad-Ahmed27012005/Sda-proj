@@ -86,11 +86,66 @@ class StreamFlixPlayer {
 document.addEventListener('DOMContentLoaded', async () => {
   const element = document.getElementById('stream-video');
   if (!element) return;
+
   const videoId = location.pathname.split('/').pop();
-  const user = currentUser();
-  const video = await apiFetch(`/api/videos/${videoId}`);
-  document.getElementById('player-title').textContent = video.title;
-  const info = await apiFetch(`/api/videos/stream-info/${videoId}`);
-  document.getElementById('quality-label').textContent = `${info.qualityLabel} - ${info.bitrate}`;
+  const user    = currentUser();
+
+  // Load video metadata for the sidebar
+  try {
+    const video = await apiFetch(`/api/videos/${videoId}`);
+    document.getElementById('player-title').textContent = video.title || 'Untitled';
+
+    const meta = [video.genre, video.releaseYear].filter(Boolean).join(' · ');
+    const metaEl = document.getElementById('player-meta');
+    if (metaEl) metaEl.textContent = meta;
+
+    if (video.description) {
+      const descEl = document.getElementById('player-desc');
+      if (descEl) descEl.textContent = video.description;
+    }
+
+    if (video.rating) {
+      const ratingEl = document.getElementById('player-rating');
+      if (ratingEl) { ratingEl.textContent = `⭐ ${parseFloat(video.rating).toFixed(1)}`; ratingEl.hidden = false; }
+    }
+
+    const detailsLink = document.getElementById('details-link');
+    if (detailsLink) detailsLink.href = `/videos/${videoId}`;
+
+    const wlBtn = document.getElementById('player-watchlist-btn');
+    if (wlBtn) {
+      wlBtn.addEventListener('click', async () => {
+        if (!getJwt()) { window.location.href = '/login'; return; }
+        try {
+          await apiFetch('/api/watchlist/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoId: Number(videoId) })
+          });
+          wlBtn.textContent = '✅ Added';
+          wlBtn.disabled = true;
+        } catch (err) {
+          wlBtn.textContent = '❌ Error';
+          setTimeout(() => { wlBtn.textContent = '❤️ Add to Watchlist'; wlBtn.disabled = false; }, 1500);
+        }
+      });
+    }
+  } catch (err) {
+    document.getElementById('player-title').textContent = 'Video';
+  }
+
+  // Load quality info — safe: we only display it when available
+  try {
+    const info = await apiFetch(`/api/videos/stream-info/${videoId}`);
+    const labelEl = document.getElementById('quality-label');
+    if (labelEl && info.qualityLabel) {
+      labelEl.textContent = info.qualityLabel + (info.bitrate ? ' — ' + info.bitrate : '');
+      labelEl.style.display = '';
+    }
+  } catch (_) {
+    // Guest or no subscription — quality info is optional, player still works
+  }
+
+  // Always start the player — streaming endpoint allows public access
   new StreamFlixPlayer(element, videoId, user?.userId).init();
 });

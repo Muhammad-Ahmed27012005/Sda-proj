@@ -70,4 +70,9 @@ public class PageController {
 	public String adminUsers() {
 		return "admin/users";
 	}
+
+	@GetMapping("/movie-search")
+	public String movieSearch() {
+		return "watchmode-search";
+	}
 }

@@ -1305,3 +1305,253 @@ footer {
 }
 .suggest-footer:hover { background: var(--acid-green-dim); color: var(--acid-green); }
 .suggest-footer strong { color: var(--championship-white); }
+
+/* ============================================================
+   Watchmode Movie Search page
+   ============================================================ */
+
+/* ── Results grid ────────────────────────────────────────── */
+.wm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* ── Search result card ──────────────────────────────────── */
+.wm-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  display: flex;
+  flex-direction: column;
+}
+.wm-card:hover {
+  border-color: rgba(143,254,9,.5);
+  transform: translateY(-5px);
+  box-shadow: var(--glow-green), var(--shadow-lg);
+}
+
+.wm-card-poster {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: var(--racing-green);
+}
+.wm-card-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.wm-card:hover .wm-card-poster img { transform: scale(1.05); }
+
+.wm-card-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  background: var(--racing-green);
+}
+
+.wm-card-type {
+  position: absolute;
+  top: .6rem;
+  right: .6rem;
+  font-family: var(--mono);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  background: rgba(14,14,15,.82);
+  border: 1px solid rgba(241,241,238,.2);
+  border-radius: 999px;
+  padding: .18rem .55rem;
+  color: var(--championship-white);
+  backdrop-filter: blur(6px);
+}
+
+.wm-card-meta {
+  padding: .9rem 1rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.wm-card-title {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin: 0 0 .3rem;
+}
+.wm-card-sub {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--text-muted);
+  margin: 0 0 .5rem;
+}
+
+/* ── Detail panel ────────────────────────────────────────── */
+.wm-detail-panel {
+  margin-top: 1.5rem;
+}
+
+.wm-detail-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.wm-detail-poster img {
+  width: 100%;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Streaming sources ───────────────────────────────────── */
+.wm-source-group {
+  margin-bottom: 1.25rem;
+}
+
+.wm-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .4rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--championship-white);
+  text-decoration: none;
+  transition: background .15s, border-color .15s, color .15s, transform .12s;
+}
+.wm-source-chip:hover {
+  background: var(--acid-green);
+  border-color: var(--acid-green);
+  color: var(--off-black);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-green);
+}
+
+.wm-source-price {
+  opacity: .7;
+  font-size: .65rem;
+}
+
+/* ── Search suggestions dropdown ────────────────────────── */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  z-index: 2000;
+  overflow: hidden;
+  min-width: 280px;
+}
+
+.suggest-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem .85rem;
+  color: var(--championship-white);
+  text-decoration: none;
+  transition: background .12s;
+  border-bottom: 1px solid var(--line);
+}
+.suggest-item:last-child { border-bottom: none; }
+.suggest-item:hover { background: var(--line); }
+
+.suggest-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  background: var(--racing-green);
+}
+.suggest-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.suggest-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.suggest-info {
+  flex: 1;
+  overflow: hidden;
+}
+.suggest-title {
+  display: block;
+  font-family: var(--display);
+  font-size: .95rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggest-title mark {
+  background: var(--acid-green-dim);
+  color: var(--acid-green);
+  border-radius: 2px;
+}
+.suggest-meta {
+  display: block;
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--text-muted);
+  margin-top: .15rem;
+}
+
+.suggest-play {
+  font-size: .8rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.suggest-item:hover .suggest-play { color: var(--acid-green); }
+
+.suggest-empty {
+  padding: .8rem 1rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+
+.suggest-footer {
+  padding: .7rem 1rem;
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: rgba(241,241,238,.04);
+  transition: background .12s, color .12s;
+}
+.suggest-footer:hover { background: var(--line); color: var(--championship-white); }
+.suggest-footer strong { color: var(--acid-green); }
+
+/* ── Responsive tweaks ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .wm-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .wm-detail-poster {
+    max-width: 200px;
+  }
+}
