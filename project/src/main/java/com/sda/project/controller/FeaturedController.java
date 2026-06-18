@@ -43,31 +43,6 @@ public class FeaturedController {
         return releaseDate.substring(0, 4);
     }
 
-    private List<Map<String, Object>> discoverMovies(String genreId, int page) {
-        try {
-            StringBuilder url = new StringBuilder();
-            url.append(tmdbBaseUrl)
-               .append("/discover/movie?api_key=").append(tmdbApiKey)
-               .append("&language=en-US&include_adult=false")
-               .append("&sort_by=popularity.desc&page=").append(page)
-               .append("&vote_count.gte=100");
-            if (genreId != null && !genreId.isBlank()) {
-                url.append("&with_genres=").append(genreId);
-            }
-            URI uri = URI.create(url.toString());
-            ResponseEntity<Map> resp = restTemplate.getForEntity(uri, Map.class);
-            if (resp.getBody() == null) return List.of();
-            List<Map<String, Object>> results = (List<Map<String, Object>>) resp.getBody().getOrDefault("results", List.of());
-            List<Map<String, Object>> mapped = new ArrayList<>();
-            for (Map<String, Object> m : results) {
-                mapped.add(transformMovie(m));
-            }
-            return mapped;
-        } catch (Exception e) {
-            return List.of();
-        }
-    }
-
     private java.util.Map<String, Object> transformMovie(Map<String, Object> m) {
         java.util.Map<String, Object> out = new LinkedHashMap<>();
         out.put("title", m.get("title"));
@@ -128,6 +103,31 @@ public class FeaturedController {
         ));
     }
 
+    private List<Map<String, Object>> discoverMovies(String genreId, int page) {
+        try {
+            StringBuilder url = new StringBuilder();
+            url.append(tmdbBaseUrl)
+               .append("/discover/movie?api_key=").append(tmdbApiKey)
+               .append("&language=en-US&include_adult=false")
+               .append("&sort_by=popularity.desc&page=").append(page)
+               .append("&vote_count.gte=100");
+            if (genreId != null && !genreId.isBlank()) {
+                url.append("&with_genres=").append(genreId);
+            }
+            URI uri = URI.create(url.toString());
+            ResponseEntity<Map> resp = restTemplate.getForEntity(uri, Map.class);
+            if (resp.getBody() == null) return List.of();
+            List<Map<String, Object>> results = (List<Map<String, Object>>) resp.getBody().getOrDefault("results", List.of());
+            List<Map<String, Object>> mapped = new ArrayList<>();
+            for (Map<String, Object> m : results) {
+                mapped.add(transformMovie(m));
+            }
+            return mapped;
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
     @GetMapping("/home-data")
     public ResponseEntity<?> homePageData() {
         java.util.Map<String, Object> data = new LinkedHashMap<>();
@@ -138,7 +138,9 @@ public class FeaturedController {
             List<Map<String, Object>> trending = new ArrayList<>();
             if (trendingResp.getBody() != null) {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) trendingResp.getBody().getOrDefault("results", List.of());
-                results.forEach(m -> trending.add(transformMovie(m)));
+                for (Map<String, Object> m : results) {
+                    trending.add(transformHomeMovie(m));
+                }
             }
             data.put("trending", trending);
         } catch (Exception e) {
@@ -151,7 +153,9 @@ public class FeaturedController {
             List<Map<String, Object>> topRated = new ArrayList<>();
             if (topResp.getBody() != null) {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) topResp.getBody().getOrDefault("results", List.of());
-                results.forEach(m -> topRated.add(transformMovie(m)));
+                for (Map<String, Object> m : results) {
+                    topRated.add(transformHomeMovie(m));
+                }
             }
             data.put("topRated", topRated);
         } catch (Exception e) {
@@ -164,7 +168,9 @@ public class FeaturedController {
             List<Map<String, Object>> recent = new ArrayList<>();
             if (recentResp.getBody() != null) {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) recentResp.getBody().getOrDefault("results", List.of());
-                results.forEach(m -> recent.add(transformMovie(m)));
+                for (Map<String, Object> m : results) {
+                    recent.add(transformHomeMovie(m));
+                }
             }
             data.put("recent", recent);
         } catch (Exception e) {
@@ -178,7 +184,9 @@ public class FeaturedController {
             List<Map<String, Object>> featured = new ArrayList<>();
             if (featResp.getBody() != null) {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) featResp.getBody().getOrDefault("results", List.of());
-                results.forEach(m -> featured.add(transformMovie(m)));
+                for (Map<String, Object> m : results) {
+                    featured.add(transformHomeMovie(m));
+                }
             }
             data.put("featured", featured);
         } catch (Exception e) {
@@ -186,5 +194,30 @@ public class FeaturedController {
         }
 
         return ResponseEntity.ok(data);
+    }
+
+    private java.util.Map<String, Object> transformHomeMovie(Map<String, Object> m) {
+        java.util.Map<String, Object> out = new LinkedHashMap<>();
+        Object id = m.get("id");
+        out.put("videoId", "tmdb-" + id);
+        out.put("tmdbId", id);
+        out.put("mediaType", "movie");
+        out.put("title", m.get("title"));
+        out.put("year", year((String) m.get("release_date")));
+        out.put("genre", mapGenreIds((List<Integer>) m.get("genre_ids")));
+        out.put("rating", m.get("vote_average") instanceof Number n ? BigDecimal.valueOf(n.doubleValue()) : null);
+        out.put("poster", posterUrl((String) m.get("poster_path")));
+        out.put("backdrop", posterUrl((String) m.get("backdrop_path")));
+        out.put("thumbnailUrl", posterUrl((String) m.get("poster_path")));
+        out.put("desc", m.get("overview"));
+        out.put("description", m.get("overview"));
+        out.put("releaseYear", year((String) m.get("release_date")));
+        out.put("duration", null);
+        out.put("videoUrl", null);
+        out.put("imdbId", null);
+        out.put("uploadDate", null);
+        out.put("popularity", m.get("popularity"));
+        out.put("voteCount", m.get("vote_count"));
+        return out;
     }
 }

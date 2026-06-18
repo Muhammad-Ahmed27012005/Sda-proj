@@ -1,5 +1,5 @@
 /* ============================================================
-   home.js — StreamFlixTv home page logic
+   home.js — StreamFlixTv home page logic (TMDB edition)
    ============================================================ */
 
 // ── Genre icon map ─────────────────────────────────────────
@@ -9,218 +9,168 @@ const GENRE_ICONS = {
   fantasy:'✨', horror:'👻', music:'🎵', mystery:'🔮',
   romance:'❤️', 'sci-fi':'🚀', 'science fiction':'🚀',
   thriller:'😨', western:'🤠', sport:'⚽', history:'📜',
-  family:'👨‍👩‍👧', biography:'📖', movie:'🎬', default:'🎬'
+  family:'👨‍👩‍👧', biography:'📖', movie:'🎬', default:'🎬',
+  'action/adventure':'🗺️', adventure:'🗺️'
 };
 function genreIcon(name) {
-  return GENRE_ICONS[(name || '').toLowerCase()] || GENRE_ICONS.default;
+  return GENRE_ICONS[(name || '').toLowerCase().trim()] || GENRE_ICONS.default;
 }
 
-// ── Famous movies catalogue — TMDB poster CDN (stable, no API key needed) ──
-// All images served from image.tmdb.org/t/p/w500 — permanent public CDN
-const FAMOUS_MOVIES = [
-  // Action
-  {
-    title: 'Deadpool & Wolverine', year: 2024, genre: 'action', rating: '7.8',
-    poster: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-    desc: 'Two anti-heroes team up in the wildest Marvel crossover yet.'
-  },
-  {
-    title: 'Top Gun: Maverick', year: 2022, genre: 'action', rating: '8.3',
-    poster: 'https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg',
-    desc: 'Maverick returns to train the next generation of Top Gun pilots.'
-  },
-  {
-    title: 'John Wick: Chapter 4', year: 2023, genre: 'action', rating: '7.8',
-    poster: 'https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg',
-    desc: 'John Wick discovers a path to defeating the High Table.'
-  },
-  {
-    title: 'Fast X', year: 2023, genre: 'action', rating: '5.9',
-    poster: 'https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdclSiC.jpg',
-    desc: 'Dom Toretto faces his most lethal adversary yet in the Fast saga.'
-  },
-  {
-    title: 'Black Panther: Wakanda Forever', year: 2022, genre: 'action', rating: '7.3',
-    poster: 'https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg',
-    desc: 'The people of Wakanda fight to protect their home and legacy.'
-  },
-  {
-    title: 'Mission: Impossible – Dead Reckoning', year: 2023, genre: 'action', rating: '7.7',
-    poster: 'https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg',
-    desc: 'Ethan Hunt races to prevent a deadly AI from falling into the wrong hands.'
-  },
-  // Drama
-  {
-    title: 'Oppenheimer', year: 2023, genre: 'drama', rating: '8.5',
-    poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-    desc: 'The story of the man who developed the first atomic bomb.'
-  },
-  {
-    title: 'Barbie', year: 2023, genre: 'drama', rating: '6.9',
-    poster: 'https://image.tmdb.org/t/p/w500/iuFNMS8vlbauVCV7Fo2t2SjDGSJ.jpg',
-    desc: 'Barbie and Ken embark on a journey of self-discovery in the real world.'
-  },
-  {
-    title: 'The Holdovers', year: 2023, genre: 'drama', rating: '7.9',
-    poster: 'https://image.tmdb.org/t/p/w500/VHSzNBTwxV8vh7wylo7O5L1UGRQ.jpg',
-    desc: 'A curmudgeonly teacher is forced to babysit a student over the holidays.'
-  },
-  {
-    title: 'Poor Things', year: 2023, genre: 'drama', rating: '8.0',
-    poster: 'https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXIf4NXoIBDLI62.jpg',
-    desc: 'A young woman brought back to life embarks on an extraordinary self-discovery.'
-  },
-  {
-    title: 'The Shawshank Redemption', year: 1994, genre: 'drama', rating: '9.3',
-    poster: 'https://image.tmdb.org/t/p/w500/lyQBXzOQSuE59IsHyhrp0qIiPAz.jpg',
-    desc: 'Two imprisoned men bond over years, finding solace and eventual redemption.'
-  },
-  // Sci-Fi
-  {
-    title: 'Dune: Part Two', year: 2024, genre: 'scifi', rating: '8.5',
-    poster: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
-    desc: 'Paul Atreides unites with the Fremen to avenge his family.'
-  },
-  {
-    title: 'Interstellar', year: 2014, genre: 'scifi', rating: '8.7',
-    poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    desc: 'A team travels through a wormhole in search of a new home for humanity.'
-  },
-  {
-    title: 'Avengers: Endgame', year: 2019, genre: 'scifi', rating: '8.4',
-    poster: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
-    desc: 'The Avengers assemble one last time to reverse Thanos\'s devastating snap.'
-  },
-  {
-    title: 'Guardians of the Galaxy Vol. 3', year: 2023, genre: 'scifi', rating: '8.0',
-    poster: 'https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg',
-    desc: 'The Guardians embark on a mission to protect one of their own.'
-  },
-  {
-    title: 'The Creator', year: 2023, genre: 'scifi', rating: '6.8',
-    poster: 'https://image.tmdb.org/t/p/w500/vBZ0qvaRxqEhZwl6LWmruJqWE8Z.jpg',
-    desc: 'A former soldier hunts down an AI weapon that could end the war.'
-  },
-  {
-    title: 'Inception', year: 2010, genre: 'scifi', rating: '8.8',
-    poster: 'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg',
-    desc: 'A thief enters the dreams of others to plant an idea in their mind.'
-  },
-  // Animation
-  {
-    title: 'Spider-Man: Across the Spider-Verse', year: 2023, genre: 'animation', rating: '8.7',
-    poster: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
-    desc: 'Miles Morales journeys across the Multiverse to meet fellow Spider-People.'
-  },
-  {
-    title: 'The Lion King', year: 1994, genre: 'animation', rating: '8.5',
-    poster: 'https://image.tmdb.org/t/p/w500/sKCr78MXSLixwmZ8DyJLrpMsd15.jpg',
-    desc: 'A young lion prince must return home to claim his rightful place as king.'
-  },
-  {
-    title: 'Elemental', year: 2023, genre: 'animation', rating: '6.8',
-    poster: 'https://image.tmdb.org/t/p/w500/6oH378KUfgdm58Z1bGkSJRIHKRg.jpg',
-    desc: 'A fire and water element discover they have more in common than expected.'
-  },
-  {
-    title: 'Toy Story 4', year: 2019, genre: 'animation', rating: '7.8',
-    poster: 'https://image.tmdb.org/t/p/w500/w9kR8qbmQ01HwnvK4alvnQ2ca0L.jpg',
-    desc: 'Woody and the gang go on an unexpected road trip with surprising new friends.'
-  },
-  // Horror
-  {
-    title: 'Talk to Me', year: 2023, genre: 'horror', rating: '7.1',
-    poster: 'https://image.tmdb.org/t/p/w500/kdPMUlRdZk4Ef3pVa5TZskFBfCb.jpg',
-    desc: 'Teens discover how to conjure spirits — with terrifying consequences.'
-  },
-  {
-    title: 'M3GAN', year: 2022, genre: 'horror', rating: '6.4',
-    poster: 'https://image.tmdb.org/t/p/w500/d9nBoowhjiiYc4FBNtQkPY7c11H.jpg',
-    desc: 'A lifelike AI doll develops a twisted sense of protection for her companion.'
-  },
-  {
-    title: 'The Nun II', year: 2023, genre: 'horror', rating: '6.2',
-    poster: 'https://image.tmdb.org/t/p/w500/5gzzkR7y3hnY8AD1wXjCnVlHba5.jpg',
-    desc: 'The sinister demon Valak continues to haunt a young novitiate in France.'
-  },
-  {
-    title: 'A Quiet Place: Day One', year: 2024, genre: 'horror', rating: '7.1',
-    poster: 'https://image.tmdb.org/t/p/w500/yrpPYKijwdMHyTGIOd1iK1h0Wno.jpg',
-    desc: 'Experience the terrifying first day the world went silent.'
-  },
-];
+// ── Famous movies loaded from TMDB API ─────────────────────
+let famousMoviesCache = [];
 
-// ── Render famous movies (poster cards, no iframes) ────────
-function renderTrailers(genre = 'all') {
-  const list = genre === 'all'
-    ? FAMOUS_MOVIES
-    : FAMOUS_MOVIES.filter(m => m.genre === genre);
+async function loadHome() {
+  const data = await apiFetch('/api/videos/tmdb/home-data');
+  window._homeData = data || {};
 
+  renderVideos('trending-row', data.trending || []);
+  renderVideos('toprated-row', data.topRated || []);
+  renderVideos('recent-row',   data.recent   || []);
+  renderVideos('featured-slider', data.featured || data.trending || []);
+
+  setupTrailerTabs();
+  await loadFamousMovies('all');
+}
+
+async function loadFamousMovies(genre) {
+  famousMoviesCache = await apiFetch(`/api/videos/tmdb/famous-movies?genre=${encodeURIComponent(genre)}`) || [];
+  renderFamousMovies(famousMoviesCache, genre);
+}
+
+function renderFamousMovies(movies, genre) {
   const grid = document.getElementById('trailers-grid');
   if (!grid) return;
+  grid.innerHTML = movies.map(m => movieCardTmdb(m, genre)).join('');
+}
 
-  grid.innerHTML = list.map(m => `
-    <div class="trailer-card" data-genre="${m.genre}">
-      <div class="trailer-poster">
-        <img src="${m.poster}" alt="${m.title}" loading="lazy"
-             onerror="this.parentElement.classList.add('trailer-poster--fallback');this.style.display='none'">
-        <div class="trailer-poster-overlay">
-          <div class="d-flex gap-2 flex-wrap">
-            <span class="card-badge">${genreIcon(m.genre)} ${m.genre.toUpperCase()}</span>
-            <span class="card-badge">⭐ ${m.rating}</span>
+// ── TMDB-aware video card for content rows ──────────────────
+function renderVideos(id, videos) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  if (videos.length) {
+    row.innerHTML = videos.map(v => videoCard(v)).join('');
+    enableDragScroll(row);
+  } else {
+    row.innerHTML = `<div style="font-family:var(--mono);font-size:.85rem;color:var(--text-muted);padding:2rem 0">
+      No titles found. Try again later.
+    </div>`;
+  }
+}
+
+function isTmdbVideo(video) {
+  return video && (String(video.videoId || '').startsWith('tmdb-') || video.mediaType === 'movie');
+}
+
+function videoCard(video) {
+  if (isTmdbVideo(video)) return movieCardTmdb(video);
+  return localVideoCard(video);
+}
+
+function localVideoCard(video) {
+  const image   = video.thumbnailUrl ? `/uploads/${video.thumbnailUrl}` : '';
+  const title   = video.title        || 'Untitled';
+  const genre   = video.genre        || 'Movie';
+  const year    = video.releaseYear  ? ' · ' + video.releaseYear        : '';
+  const rating  = video.rating       ? `⭐ ${parseFloat(video.rating).toFixed(1)}` : '';
+  const dur     = video.duration     ? fmtDuration(video.duration)      : '';
+
+  let posterHtml;
+  if (image) {
+    posterHtml = `<img src="${image}" alt="${title}" loading="lazy">`;
+  } else {
+    posterHtml = `<div class="video-poster-fallback"><span>${title}</span></div>`;
+  }
+
+  return `
+    <article class="video-card">
+      <a class="video-poster" href="/watch/${video.videoId}" aria-label="Play ${title}">
+        ${posterHtml}
+        <div class="card-hover-overlay">
+          <div class="card-hover-meta">
+            ${rating ? `<span class="card-badge">${rating}</span>` : ''}
+            ${genre  ? `<span class="card-badge">${genre}</span>`  : ''}
+            ${dur    ? `<span class="card-badge">⏱ ${dur}</span>`  : ''}
           </div>
+          <span class="card-play-btn">▶ Watch Now</span>
+        </div>
+      </a>
+      <div class="video-meta">
+        <p class="video-meta-tag">${genre}${year}${rating ? ' · ' + rating : ''}</p>
+        <h3>${title}</h3>
+        <div class="video-actions">
+          <a class="btn btn-stream btn-sm" href="/watch/${video.videoId}">▶ Play</a>
+          <a class="btn btn-ghost btn-sm"  href="/videos/${video.videoId}">Details</a>
         </div>
       </div>
-      <div class="trailer-meta">
-        <h3 class="trailer-title">${m.title}</h3>
-        <p class="trailer-year">${m.year}</p>
-        <p class="trailer-desc">${m.desc}</p>
+    </article>`;
+}
+
+function movieCardTmdb(video, inFamousSection = false) {
+  const title   = video.title || 'Untitled';
+  const poster  = video.poster || video.thumbnailUrl || '';
+  const genre   = video.genre || 'Movie';
+  const year    = video.year || video.releaseYear ? ' · ' + (video.year || video.releaseYear) : '';
+  const rating  = video.rating ? `⭐ ${parseFloat(video.rating).toFixed(1)}` : '';
+  const desc    = video.desc || video.description || '';
+  const tmdbId  = video.tmdbId || (String(video.videoId || '').replace('tmdb-', ''));
+  const href    = `/movie/${tmdbId}`;
+  const playHref = `https://vidlink.pro/movie/${tmdbId}`;
+
+  let posterHtml;
+  if (poster) {
+    posterHtml = `<img src="${poster}" alt="${title}" loading="lazy"
+                  onerror="this.parentElement.classList.add('video-poster-fallback');this.style.display='none'">`;
+  } else {
+    posterHtml = `<div class="video-poster-fallback"><span>${genreIcon(genre)}</span></div>`;
+  }
+
+  return `
+    <article class="video-card">
+      <a class="video-poster" href="${href}" aria-label="${title}" target="_self">
+        ${posterHtml}
+        <div class="card-hover-overlay">
+          <div class="card-hover-meta">
+            ${rating ? `<span class="card-badge">${rating}</span>` : ''}
+            ${genre  ? `<span class="card-badge">${genreIcon(genre)} ${genre}</span>`  : ''}
+          </div>
+          <span class="card-play-btn">▶ Play Now</span>
+        </div>
+      </a>
+      <div class="video-meta">
+        <p class="video-meta-tag">${genre}${year}${rating ? ' · ' + rating : ''}</p>
+        <h3>${title}</h3>
+        <p class="video-meta-tag" style="margin-top:.35rem;color:var(--text-dim);font-size:.8rem;line-height:1.5">
+          ${desc.length > 110 ? desc.substring(0,110) + '…' : desc}
+        </p>
+        <div class="video-actions">
+          <a class="btn btn-stream btn-sm" href="${playHref}" target="_blank">▶ Stream</a>
+          <a class="btn btn-ghost btn-sm"  href="${href}">📋 Details</a>
+        </div>
       </div>
-    </div>`).join('');
+    </article>`;
+}
+
+function fmtDuration(mins) {
+  if (!mins) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h ? `${h}h ${m}m` : `${m}m`;
 }
 
 // ── Trailer genre tab filter ───────────────────────────────
 function setupTrailerTabs() {
   const container = document.getElementById('trailer-genre-tabs');
   if (!container) return;
-  container.addEventListener('click', e => {
+  container.addEventListener('click', async e => {
     const btn = e.target.closest('.tab-btn[data-genre]');
     if (!btn) return;
     container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    renderTrailers(btn.dataset.genre);
+    await loadFamousMovies(btn.dataset.genre);
   });
 }
 
-// ── Main home load ─────────────────────────────────────────
-async function loadHome() {
-  const [trending, recent, categories] = await Promise.all([
-    apiFetch('/api/videos/trending'),
-    apiFetch('/api/videos/recent'),
-    apiFetch('/api/categories')
-  ]);
-
-  // Store for tab switching
-  window._homeData = { trending, recent };
-
-  renderVideos('trending-row', trending);
-  renderVideos('recent-row',   recent);
-
-  // Top rated: all videos sorted by rating desc
-  const allForRating = [...trending, ...recent]
-    .filter((v, i, arr) => arr.findIndex(x => x.videoId === v.videoId) === i)
-    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  renderVideos('toprated-row', allForRating);
-
-  renderVideos('featured-slider', recent.length ? recent : trending);
-  renderCategories(categories);
-
-  if (getJwt()) loadContinueWatching();
-
-  renderTrailers('all');
-  setupTrailerTabs();
-}
-
+// ── Continue watching ──────────────────────────────────────
 async function loadContinueWatching() {
   try {
     const items = await apiFetch('/api/history/continue');
@@ -230,20 +180,6 @@ async function loadContinueWatching() {
     row.innerHTML = items.map(continueCard).join('');
     enableDragScroll(row);
   } catch (_) {}
-}
-
-// ── Rendering helpers ──────────────────────────────────────
-function renderVideos(id, videos) {
-  const row = document.getElementById(id);
-  if (!row) return;
-  if (videos.length) {
-    row.innerHTML = videos.map(videoCard).join('');
-    enableDragScroll(row);
-  } else {
-    row.innerHTML = `<div style="font-family:var(--mono);font-size:.85rem;color:var(--text-muted);padding:2rem 0">
-      No titles yet — drop an MP4 into upload/movies to get started.
-    </div>`;
-  }
 }
 
 function continueCard(item) {
@@ -268,23 +204,34 @@ function continueCard(item) {
     </article>`;
 }
 
-function renderCategories(root) {
+// ── Categories (kept for layout; no TMDB category fetch yet) ──
+async function loadCategories() {
   const target = document.getElementById('category-row');
-  const children = root.children || [];
-  if (!children.length) {
-    target.innerHTML = `<p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted)">No categories yet.</p>`;
-    return;
-  }
-  target.innerHTML = children.map(cat => `
-    <button class="category-chip-icon" data-category="${cat.name}">
-      <span class="cat-icon">${genreIcon(cat.name)}</span>
-      <span class="cat-name">${cat.name}</span>
-    </button>`).join('');
+  if (!target) return;
+  target.innerHTML = `
+    <button class="category-chip-icon" data-category="Action">
+      <span class="cat-icon">🔥</span><span class="cat-name">Action</span>
+    </button>
+    <button class="category-chip-icon" data-category="Drama">
+      <span class="cat-icon">🎭</span><span class="cat-name">Drama</span>
+    </button>
+    <button class="category-chip-icon" data-category="Sci-Fi">
+      <span class="cat-icon">🚀</span><span class="cat-name">Sci-Fi</span>
+    </button>
+    <button class="category-chip-icon" data-category="Comedy">
+      <span class="cat-icon">😂</span><span class="cat-name">Comedy</span>
+    </button>
+    <button class="category-chip-icon" data-category="Horror">
+      <span class="cat-icon">👻</span><span class="cat-name">Horror</span>
+    </button>
+    <button class="category-chip-icon" data-category="Animation">
+      <span class="cat-icon">🎨</span><span class="cat-name">Animation</span>
+    </button>`;
   target.querySelectorAll('[data-category]').forEach(btn =>
     btn.addEventListener('click', () => triggerSearch(btn.dataset.category)));
 }
 
-// ── Drag-to-scroll for content rows ───────────────────────
+// ── Drag-to-scroll for content rows ────────────────────────
 function enableDragScroll(el) {
   if (!el || el.dataset.dragEnabled) return;
   el.dataset.dragEnabled = 'true';
@@ -292,7 +239,6 @@ function enableDragScroll(el) {
   let isDown = false, startX = 0, scrollLeft = 0;
 
   el.addEventListener('mousedown', e => {
-    // Don't hijack clicks on buttons/links
     if (e.target.closest('a,button')) return;
     isDown    = true;
     startX    = e.pageX - el.offsetLeft;
@@ -312,7 +258,6 @@ function enableDragScroll(el) {
     el.scrollLeft = scrollLeft - walk;
   });
 
-  // Touch drag (mobile)
   let touchStartX = 0, touchScrollLeft = 0;
   el.addEventListener('touchstart', e => {
     touchStartX    = e.touches[0].pageX;
@@ -324,18 +269,14 @@ function enableDragScroll(el) {
   }, { passive: true });
 }
 
-// ── Section tab switcher — scoped to the discover section ──
+// ── Section tab switcher ────────────────────────────────────
 document.addEventListener('click', e => {
   const btn = e.target.closest('.tab-btn[data-tab]');
   if (!btn) return;
-
   const section = btn.closest('section');
   if (!section) return;
-
-  // Deactivate only sibling tab buttons in this section
   section.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
   section.querySelectorAll('.tab-panel').forEach(p => { p.hidden = true; });
-
   btn.classList.add('active');
   const panel = document.getElementById(btn.dataset.tab);
   if (panel) panel.hidden = false;
@@ -350,12 +291,22 @@ async function triggerSearch(query) {
   section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const row = document.getElementById('search-row');
-  row.innerHTML = `<p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted);padding:1rem 0">Searching…</p>`;
+  row.innerHTML = `<p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted);padding:1rem 0">Searching TMDB…</p>`;
 
   try {
-    const videos = await apiFetch(`/api/videos?search=${encodeURIComponent(query)}`);
-    if (videos.length) {
-      row.innerHTML = videos.map(videoCard).join('');
+    const videos = await apiFetch(`/api/tmdb/search/multi?query=${encodeURIComponent(query)}`);
+    const results = videos.results || [];
+    if (results.length) {
+      row.innerHTML = results.map(v => movieCardTmdb({
+        title: v.title || v.name,
+        poster: v.poster_path ? 'https://image.tmdb.org/t/p/w500' + v.poster_path : null,
+        genre: (v.media_type || 'movie').toUpperCase(),
+        year: v.release_date ? v.release_date.substring(0,4) : (v.first_air_date ? v.first_air_date.substring(0,4) : ''),
+        rating: v.vote_average,
+        desc: v.overview,
+        tmdbId: v.id,
+        mediaType: v.media_type
+      })).join('');
       enableDragScroll(row);
     } else {
       row.innerHTML = `<p style="font-family:var(--mono);font-size:.82rem;color:var(--text-muted);padding:1rem 0">No results for "${query}".</p>`;
@@ -378,43 +329,36 @@ function clearSearch() {
 // ── Live search suggestions ────────────────────────────────
 let suggestDebounce  = null;
 let searchDebounce   = null;
-let allVideos        = [];
 
-async function ensureVideoCache() {
-  if (allVideos.length) return;
-  try { allVideos = await apiFetch('/api/videos'); } catch (_) {}
-}
-
-function showSuggestions(query) {
+async function showSuggestions(query) {
   const box = document.getElementById('search-suggestions');
   if (!box) return;
   const q = query.toLowerCase().trim();
   if (!q) { hideSuggestions(); return; }
 
-  const matches = allVideos
-    .filter(v => (v.title || '').toLowerCase().includes(q) ||
-                 (v.genre || '').toLowerCase().includes(q))
-    .slice(0, 7);
+  box.innerHTML = `<div class="suggest-empty">Searching…</div>`;
+  box.hidden = false;
 
-  const rx = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-
-  if (!matches.length) {
-    box.innerHTML = `<div class="suggest-empty">No results for "<strong>${query}</strong>"</div>`;
-  } else {
+  try {
+    const res = await apiFetch(`/api/tmdb/search/multi?query=${encodeURIComponent(q)}`);
+    const matches = (res.results || []).slice(0, 7);
+    if (!matches.length) {
+      box.innerHTML = `<div class="suggest-empty">No results for "<strong>${query}</strong>"</div>`;
+      return;
+    }
+    const rx = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     box.innerHTML = matches.map(v => {
-      const img    = v.thumbnailUrl ? `/uploads/${v.thumbnailUrl}` : '';
-      const title  = v.title  || 'Untitled';
-      const genre  = v.genre  || 'Movie';
-      const year   = v.releaseYear ? ` · ${v.releaseYear}` : '';
-      const rating = v.rating ? `⭐ ${parseFloat(v.rating).toFixed(1)}` : '';
+      const img    = v.poster_path ? 'https://image.tmdb.org/t/p/w500' + v.poster_path : '';
+      const title  = v.title || v.name || 'Untitled';
+      const genre  = (v.media_type || 'movie').toUpperCase();
+      const year   = v.release_date ? ' · ' + v.release_date.substring(0,4) : (v.first_air_date ? ' · ' + v.first_air_date.substring(0,4) : '');
+      const rating = v.vote_average ? `⭐ ${parseFloat(v.vote_average).toFixed(1)}` : '';
       const hl     = title.replace(rx, '<mark>$1</mark>');
-
+      const href   = `/movie/${v.id}`;
       return `
-        <a class="suggest-item" href="/videos/${v.videoId}">
+        <a class="suggest-item" href="${href}">
           <div class="suggest-thumb">
-            ${img
-              ? `<img src="${img}" alt="${title}" loading="lazy">`
-              : `<div class="suggest-thumb-fallback">${genreIcon(genre)}</div>`}
+            ${img ? `<img src="${img}" alt="${title}" loading="lazy">` : `<div class="suggest-thumb-fallback">${genreIcon(genre)}</div>`}
           </div>
           <div class="suggest-info">
             <span class="suggest-title">${hl}</span>
@@ -423,16 +367,15 @@ function showSuggestions(query) {
           <span class="suggest-play">▶</span>
         </a>`;
     }).join('');
-
     const safeQuery = query.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     box.innerHTML += `
       <div class="suggest-footer"
            onclick="triggerSearch('${safeQuery}');hideSuggestions()">
         🔍 See all results for "<strong>${query}</strong>"
       </div>`;
+  } catch (_) {
+    box.innerHTML = `<div class="suggest-empty">Search failed. Try again.</div>`;
   }
-
-  box.hidden = false;
 }
 
 function hideSuggestions() {
@@ -443,8 +386,6 @@ function hideSuggestions() {
 function setupSearch() {
   const input = document.getElementById('nav-search-input');
   if (!input) return;
-
-  ensureVideoCache();
 
   input.addEventListener('focus', () => {
     if (input.value.trim()) showSuggestions(input.value.trim());
@@ -473,7 +414,7 @@ function setupSearch() {
   });
 }
 
-// ── Boot ───────────────────────────────────────────────────
+// ── Boot ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadHome().catch(err => console.error('loadHome:', err));
   setupSearch();
